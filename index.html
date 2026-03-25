@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BLESSING ENTERPRISE | Cosmetics</title>
+
+    <!-- SEO -->
+    <meta name="description" content="BLESSING ENTERPRISE - Enhancing Beauty, Empowering Confidence. Shop premium cosmetics via WhatsApp.">
+
+    <!-- Favicon -->
+    <link rel="icon" href="imag/favicon.png" />
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#f8c8dc",
+              nude: "#f5e6da",
+            }
+          }
+        }
+      }
+    </script>
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="image" href="imag/favicon.png">
+    <link rel="preload" as="image" href="imag/serum.png">
+    <link rel="preload" as="image" href="imag/lipstick.png">
+
+    <style>
+      html { scroll-behavior: smooth; }
+      
+      body { 
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(rgba(248, 200, 220, 0.85), rgba(245, 230, 218, 0.9)), 
+                    url('imag/background1.png');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      h1,h2,h3 { font-family: 'Playfair Display', serif; }
+
+      @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        animation: fadeIn 1s ease forwards;
+      }
+      .animate-fade-in.delay-200 {
+        animation-delay: 0.2s;
+      }
+      
+      #main-content {
+        flex: 1;
+      }
+       /* Loading spinner animation */
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .animate-spin {
+        animation: spin 1s linear infinite;
+      }
+      
+      /* Skeleton loading effect */
+      .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+      }
+      
+      @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+    </style>
+  </head>
+
+  <body class="text-gray-700 flex flex-col min-h-screen">
+    <!-- NAVBAR -->
+    <nav class="fixed w-full bg-white shadow-md z-50 top-0">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+          <a href="#" onclick="loadPage('pages/dashboard.html')" class="flex items-center">
+            <img src="imag/favicon.png" class="w-14 h-14 object-contain">
+          </a>
+          <a href="#" onclick="loadPage('pages/dashboard.html')" class="text-pink-600 font-bold text-2xl hover:text-pink-500 transition">
+            BLESSING ENTERPRISE
+          </a>
+        </div>
+        <div class="space-x-6 hidden md:flex items-center">
+          <ul class="flex space-x-6">
+            <li><a href="#" onclick="loadPage('pages/dashboard.html')" class="hover:text-pink-400 transition">Home</a></li>
+            <li><a href="#" onclick="loadPage('pages/products.html')" class="hover:text-pink-400 transition">Shop</a></li>>
+            <li><a href="#" onclick="loadPage('pages/offers.html')" class="hover:text-pink-400 transition">Offers</a></li>
+            <li><a href="#" onclick="loadPage('pages/contact.html')" class="hover:text-pink-400 transition">Contact</a></li>
+            <li><a href="#" onclick="loadPage('pages/location.html')" class="hover:text-pink-400 transition">Location</a></li
+            <li><a href="#" onclick="loadPage('pages/about.html')" class="hover:text-pink-400 transition">About Us</a></li>
+          </ul>
+          <button onclick="openCart()" class="bg-primary px-4 py-2 rounded-lg shadow hover:scale-105 transition">
+            Cart (<span id="cart-count">0</span>)
+          </button>
+        </div>
+      </div>
+    </nav>
+    
+    <!-- MAIN CONTENT - This is where pages load -->
+    <div id="main-content" class="pt-24">
+      <!-- Initial loading indicator -->
+      <div class="text-center py-20">
+        <p class="text-pink-400">Loading...</p>
+      </div>
+    </div>
+
+    <!-- CART MODAL  -->
+    <div id="cart-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+      <div class="bg-white w-11/12 md:w-1/2 p-6 rounded-xl shadow-xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold">Your Cart</h2>
+          <button onclick="closeCart()" class="text-gray-500 hover:text-gray-700 text-xl">✕</button>
+        </div>
+        <div id="cart-items"></div>
+        <div class="mt-4 border-t pt-4">
+          <h3 class="text-lg font-semibold">Total: $<span id="cart-total">0</span></h3>
+          <button onclick="checkout()" class="mt-4 w-full bg-pink-400 text-white py-3 rounded-lg hover:scale-105 transition">
+            Place Order via WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER  -->
+    <footer class="bg-nude py-12 mt-auto">
+      <div class="max-w-6xl mx-auto px-6">
+        <!-- Three Column Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          
+          <!-- Our Story -->
+          <div>
+            <h3 class="text-xl font-serif text-pink-600 mb-3">Our Story</h3>
+            <p class="text-sm text-gray-700">BLESSING ENTERPRISE celebrates beauty in all forms. We empower women through luxurious, accessible cosmetic products.</p>
+            <p class="text-sm text-gray-700 mt-2"><strong class="text-pink-600">Mission:</strong> Enhance confidence & promote authenticity.</p>
+            <p class="text-sm text-gray-700"><strong class="text-pink-600">Vision:</strong> A trusted boutique where beauty meets empowerment.</p>
+          </div>
+          
+          <!-- Contact Card -->
+          <div class="bg-white rounded-xl p-5 shadow-lg hover:shadow-xl transition">
+            <h3 class="text-lg font-semibold text-pink-600 mb-3">Contact Us</h3>
+            <p class="text-sm"><strong>WhatsApp:</strong> <a href="https://wa.me/254711490385" class="text-pink-600">0711490385</a></p>
+            <p class="text-sm"><strong>Email:</strong> <a href="mailto:ruthkamamia31@gmail.com" class="text-pink-600">ruthkamamia31@gmail.com</a></p>
+          </div>
+          
+          <!-- Location Card -->
+          <div class="bg-white rounded-xl p-5 shadow-lg hover:shadow-xl transition">
+            <h3 class="text-lg font-semibold text-pink-600 mb-3">Visit Us</h3>
+            <p class="text-sm">Nakuru, Gilgil, Langa Langa</p>
+            <a href="https://www.google.com/maps/search/Nakuru+Gilgil+Langa+Langa" target="_blank" class="text-sm text-pink-600 inline-block mt-2">View on Map →</a>
+          </div>
+        </div>
+        
+        <!-- Divider -->
+        <div class="border-t border-pink-200 pt-6 text-center">
+          <p class="text-sm text-gray-600">© 2026 BLESSING ENTERPRISE. All rights reserved.</p>
+          <a href="https://wa.me/254711490385" class="text-sm text-pink-500 hover:text-pink-600 inline-block mt-1">Contact on WhatsApp</a>
+        </div>
+      </div>
+    </footer>
+    
+    <!-- Floating WhatsApp Button with Image Icon - 3/4 Fill -->
+    <a href="https://wa.me/254711490385" target="_blank" 
+      class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 rounded-full shadow-xl transition-all duration-300 transform hover:scale-110 z-50 animate-pulse flex items-center justify-center"
+      style="width: 56px; height: 56px;">
+      <img src="imag/whatsapp-icon.png" alt="WhatsApp" class="w-7/8 h-7/8 object-contain">
+    </a>
+
+    <script src="products.js"></script>
+    <script src="scripts.js"></script>
+
+    <script>
+      // Cache for faster loading
+      let pageCache = {};
+
+      function loadPage(page) {
+        const mainContent = document.getElementById("main-content");
+        
+        // Check cache first
+        if (pageCache[page]) {
+          mainContent.innerHTML = pageCache[page];
+          window.scrollTo(0, 0);
+          
+          if (page.includes('products.html')) {
+            setTimeout(() => {
+              if (typeof renderProducts === 'function') {
+                renderProducts();
+              }
+            }, 10);
+          }
+          return;
+        }
+        
+        // Show loading indicator with spinner
+        mainContent.innerHTML = '<div class="text-center py-20"><div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-pink-400"></div><p class="text-pink-400 mt-4">Loading...</p></div>';
+        
+        fetch(page)
+          .then(res => {
+            if (!res.ok) throw new Error('Page not found');
+            return res.text();
+          })
+          .then(data => {
+            // Cache the page
+            pageCache[page] = data;
+            mainContent.innerHTML = data;
+            window.scrollTo(0, 0);
+            
+            if (page.includes('products.html')) {
+              requestAnimationFrame(() => {
+                if (typeof renderProducts === 'function') {
+                  renderProducts();
+                }
+              });
+            }
+          })
+          .catch(() => {
+            mainContent.innerHTML = 
+              "<p class='text-center py-10 text-red-500'>Failed to load page. Please try again.</p>";
+          });
+      }
+      
+      // Load dashboard on page load
+      window.onload = () => loadPage("pages/dashboard.html");
+    </script>
+  </body>
+</html>
