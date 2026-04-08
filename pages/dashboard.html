@@ -1,34 +1,92 @@
-
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home | BLESSING ENTERPRISE</title>
+  </head>
   <body>
-      <!-- dashboard.html -->
-    <section class="min-h-screen bg-beige p-6 flex flex-col items-center justify-center text-center transition-all duration-700">
-      <h1 class="text-4xl md:text-6xl font-serif text-pink-600 mb-4 animate-fade-in">Welcome to BLESSING ENTERPRISE</h1>
-      <p class="text-lg md:text-2xl text-gray-700 mb-8 animate-fade-in delay-200">Enhancing Beauty, Empowering Confidence</p>
+    <section class="section-shell">
+      <div class="glass-panel accent-panel overflow-hidden rounded-[2rem] bg-white px-6 py-10 backdrop-blur-sm md:px-10 md:py-14">
+        <div class="grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr]">
+          <div>
+            <p class="mb-3 text-sm uppercase tracking-[0.38em] text-rose-500">Curated For Everyday Beauty</p>
+            <h2 class="text-4xl leading-tight text-[var(--ink)] md:text-5xl">A softer, smarter beauty shop built around confidence and care.</h2>
+            <p class="mt-5 max-w-xl text-base leading-8 text-gray-600">
+              Explore elegant essentials that fit naturally into your routine, from brightening serums to rich oils and statement lip color.
+            </p>
+            <div class="mt-8 flex flex-wrap gap-4">
+              <a href="#" onclick="openCategory('All')" class="btn-primary rounded-full px-7 py-3 text-sm font-medium">Start Shopping</a>
+              <a href="#" onclick="openCategory('Offers')" class="rounded-full bg-violet-600 px-7 py-3 text-sm font-medium text-white shadow-soft transition hover:-translate-y-0.5">Shop Offers</a>
+              <a href="#" onclick="loadPage('pages/contact.html')" class="btn-secondary rounded-full px-7 py-3 text-sm font-medium">Talk to Us</a>
+            </div>
 
-      <!-- Product Highlights / Categories -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl mb-8">
-        <a href="#" onclick="loadPage('pages/products.html')" class="bg-white shadow-lg rounded-xl p-6 hover:scale-105 transition transform cursor-pointer">
-          <img src="imag/serum.png" alt="Skincare" class="mx-auto h-32 object-contain mb-4">
-          <h3 class="font-semibold text-pink-600">Skincare</h3>
-        </a>
-        <a href="#" onclick="loadPage('pages/products.html')" class="bg-white shadow-lg rounded-xl p-6 hover:scale-105 transition transform cursor-pointer">
-          <img src="imag/lipstick.png" alt="Makeup" class="mx-auto h-32 object-contain mb-4">
-          <h3 class="font-semibold text-pink-600">Makeup</h3>
-        </a>
-        <a href="#" onclick="loadPage('pages/products.html')" class="bg-white shadow-lg rounded-xl p-6 hover:scale-105 transition transform cursor-pointer">
-          <img src="imag/hair-oil.png" alt="Haircare" class="mx-auto h-32 object-contain mb-4">
-          <h3 class="font-semibold text-pink-600">Haircare</h3>
-        </a>
+            <div class="mt-8 flex flex-wrap gap-3">
+              <button onclick="openCategory('Offers')" class="rounded-full bg-gradient-to-r from-fuchsia-500 to-violet-600 px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:-translate-y-0.5">Offers</button>
+              <button onclick="openCategory('Facials')" class="rounded-full bg-white/78 px-4 py-2 text-sm font-medium text-rose-700 shadow-soft transition hover:-translate-y-0.5">Facials</button>
+              <button onclick="openCategory('Lips')" class="rounded-full bg-white/78 px-4 py-2 text-sm font-medium text-rose-700 shadow-soft transition hover:-translate-y-0.5">Lips</button>
+              <button onclick="openCategory('Haircare')" class="rounded-full bg-white/78 px-4 py-2 text-sm font-medium text-rose-700 shadow-soft transition hover:-translate-y-0.5">Haircare</button>
+              <button onclick="openCategory('Bodycare')" class="rounded-full bg-white/78 px-4 py-2 text-sm font-medium text-rose-700 shadow-soft transition hover:-translate-y-0.5">Bodycare</button>
+              <button onclick="openCategory('Handcare')" class="rounded-full bg-white/78 px-4 py-2 text-sm font-medium text-rose-700 shadow-soft transition hover:-translate-y-0.5">Handcare</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <a href="#" onclick="openCategory('Facials')" class="interactive-card rounded-[1.75rem] bg-white/50 p-5 text-center shadow-[0_18px_38px_rgba(15,23,42,0.14)] backdrop-blur-sm">
+              <img src="imag/serum.png" alt="Skincare" class="mx-auto h-40 object-contain md:h-44">
+              <h3 class="mt-4 text-xl text-rose-700">Facials</h3>
+              <p class="mt-2 text-sm text-gray-600">Serums, toners, creams, and glow-focused essentials.</p>
+            </a>
+            <a href="#" onclick="openCategory('Lips')" class="interactive-card rounded-[1.75rem] bg-white p-5 text-center shadow-[0_18px_38px_rgba(15,23,42,0.14)] backdrop-blur-sm">
+              <img src="imag/lipstick.png" alt="Makeup" class="mx-auto h-40 object-contain md:h-44">
+              <h3 class="mt-4 text-xl text-rose-700">Lips</h3>
+              <p class="mt-2 text-sm text-gray-600">Lipsticks, balms, and soft glossy everyday color.</p>
+            </a>
+            <a href="#" onclick="openCategory('Haircare')" class="interactive-card rounded-[1.75rem] bg-white p-5 text-center shadow-[0_18px_38px_rgba(15,23,42,0.14)] backdrop-blur-sm">
+              <img src="imag/hair-oil.png" alt="Haircare" class="mx-auto h-40 object-contain md:h-44">
+              <h3 class="mt-4 text-xl text-rose-700">Haircare</h3>
+              <p class="mt-2 text-sm text-gray-600">Nourishing treatments that feel rich and silky.</p>
+            </a>
+            <a href="#" onclick="openCategory('Bodycare')" class="interactive-card rounded-[1.75rem] bg-white p-5 text-center shadow-[0_18px_38px_rgba(15,23,42,0.14)] backdrop-blur-sm">
+              <img src="imag/product-body-butter.jpg" alt="Bodycare" class="mx-auto h-40 w-full rounded-[1.25rem] object-cover md:h-44">
+              <h3 class="mt-4 text-xl text-rose-700">Bodycare</h3>
+              <p class="mt-2 text-sm text-gray-600">Body oils, lotions, and boutique moisture rituals.</p>
+            </a>
+            <a href="#" onclick="openCategory('Handcare')" class="interactive-card rounded-[1.75rem] bg-white p-5 text-center shadow-[0_18px_38px_rgba(15,23,42,0.14)] backdrop-blur-sm">
+              <img src="imag/product-hand-body-lotion.jpg" alt="Handcare" class="mx-auto h-40 w-full rounded-[1.25rem] object-cover md:h-44">
+              <h3 class="mt-4 text-xl text-rose-700">Handcare</h3>
+              <p class="mt-2 text-sm text-gray-600">Soft-touch hand creams and comforting lotion care.</p>
+            </a>
+          </div>
+        </div>
       </div>
 
-      <!-- Quick Action Buttons -->
-      <div class="flex flex-wrap justify-center gap-4">
-        <a href="#" onclick="loadPage('pages/products.html')" class="btn-primary px-6 py-3 rounded-lg hover:scale-105 transition">Shop Now</a>
-        <a href="#" onclick="loadPage('pages/contact.html')" class="btn-secondary px-6 py-3 rounded-lg hover:scale-105 transition">Contact us</a>
+      <div class="mt-8 grid gap-6 md:grid-cols-3">
+        <div class="interactive-card glass-panel rounded-[1.75rem] bg-white p-6 backdrop-blur-sm">
+          <div class="overflow-hidden rounded-[1.4rem] bg-gradient-to-br from-pink-50 to-violet-100">
+            <img src="imag/card-gentle-luxury.jpg" alt="Luxury skincare textures" class="h-52 w-full object-cover transition duration-500 hover:scale-105">
+          </div>
+          <p class="text-sm uppercase tracking-[0.3em] text-rose-500">01</p>
+          <h3 class="mt-4 text-2xl text-[var(--ink)]">Gentle luxury</h3>
+          <p class="mt-3 text-sm leading-7 text-gray-600">Soft tones, clean ingredients, and products selected to feel premium without being intimidating.</p>
+        </div>
+        <div class="interactive-card glass-panel rounded-[1.75rem] bg-white p-6 backdrop-blur-sm">
+          <div class="overflow-hidden rounded-[1.4rem] bg-gradient-to-br from-pink-50 to-violet-100">
+            <img src="imag/card-everyday-confidence.jpg" alt="Woman holding beauty products" class="h-52 w-full object-cover object-top transition duration-500 hover:scale-105">
+          </div>
+          <p class="text-sm uppercase tracking-[0.3em] text-rose-500">02</p>
+          <h3 class="mt-4 text-2xl text-[var(--ink)]">Everyday confidence</h3>
+          <p class="mt-3 text-sm leading-7 text-gray-600">Beauty choices that support daily routines, special occasions, and everything in between.</p>
+        </div>
+        <div class="interactive-card glass-panel rounded-[1.75rem] bg-white p-6 backdrop-blur-sm">
+          <div class="overflow-hidden rounded-[1.4rem] bg-gradient-to-br from-pink-50 to-violet-100">
+            <img src="imag/card-easy-ordering.jpg" alt="Hair care product among leaves" class="h-52 w-full object-cover transition duration-500 hover:scale-105">
+          </div>
+          <p class="text-sm uppercase tracking-[0.3em] text-rose-500">03</p>
+          <h3 class="mt-4 text-2xl text-[var(--ink)]">Easy ordering</h3>
+          <p class="mt-3 text-sm leading-7 text-gray-600">Browse, add to cart, and complete your order with a direct WhatsApp checkout flow.</p>
+        </div>
       </div>
     </section>
   </body>
-  
 </html>

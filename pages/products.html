@@ -1,15 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products - BLESSING ENTERPRISE</title>
-</head>
-<body>
-    <!-- PRODUCTS -->
-    <section id="products" class="py-20 px-6 max-w-6xl mx-auto">
-        <h2 class="text-3xl text-center mb-10 text-pink-400">Our Products</h2>
-        <div id="product-grid" class="grid md:grid-cols-3 gap-8"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Products | BLESSING ENTERPRISE</title>
+  </head>
+  <body>
+    <section id="products" class="section-shell">
+      <div class="glass-panel accent-panel rounded-[2rem] bg-white px-6 py-10 backdrop-blur-sm md:px-10 md:py-14">
+        <div class="products-hero flex flex-col gap-4 rounded-[1.75rem] px-6 py-7 md:flex-row md:items-end md:justify-between md:px-8 md:py-8">
+          <div>
+            <p class="hero-kicker text-sm uppercase tracking-[0.35em] text-rose-500">Collection</p>
+            <h2 class="mt-4 text-4xl text-[var(--ink)] md:text-5xl">Our Products</h2>
+            <p class="hero-copy mt-4 max-w-2xl text-sm leading-8 text-gray-600">
+              Browse our curated beauty picks, designed to bring softness, glow, and confidence into your everyday routine.
+            </p>
+          </div>
+          <div class="hero-badge rounded-full bg-gradient-to-r from-pink-100 to-violet-100 px-5 py-3 text-sm text-gray-700 shadow-soft">
+            WhatsApp checkout available
+          </div>
+        </div>
+
+        <div class="sticky top-[88px] z-30 -mx-6 mt-8 md:-mx-10">
+          <div class="main-surface products-toolbar border-y border-rose-100/70 bg-white px-6 py-4 shadow-[0_14px_30px_rgba(244,114,182,0.10)] backdrop-blur md:px-10">
+            <div id="category-filters" class="flex flex-wrap gap-3"></div>
+
+            <div class="mt-4 grid gap-4 md:grid-cols-[1fr_auto_auto_auto] md:items-center">
+              <div class="relative">
+                <input
+                  id="product-search"
+                  type="search"
+                  placeholder="Search by product name, category, or description"
+                  class="w-full rounded-[1.5rem] border border-rose-100 bg-white/82 px-5 py-4 pr-12 text-sm text-gray-700 outline-none transition focus:border-rose-300"
+                >
+                <span class="toolbar-hint pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs font-semibold uppercase tracking-[0.2em] text-rose-400">Find</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <select
+                  id="product-sort"
+                  class="rounded-full border border-rose-100 bg-white/82 px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-rose-300"
+                >
+                  <option value="featured">Featured</option>
+                  <option value="name-asc">A to Z</option>
+                  <option value="name-desc">Z to A</option>
+                  <option value="price-asc">Price low to high</option>
+                  <option value="price-desc">Price high to low</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-3">
+                <p class="toolbar-chip flex items-center gap-2 rounded-full bg-violet-100 px-4 py-3 text-sm font-medium text-violet-700 shadow-soft">
+                  <span aria-hidden="true">♥</span>
+                  <span>Wishlist:</span>
+                  <span id="favorites-count">0</span>
+                </p>
+              </div>
+              <div class="flex items-center gap-3">
+                <p id="product-results-count" class="toolbar-chip rounded-full bg-white/82 px-4 py-3 text-sm text-gray-600 shadow-soft">0 products</p>
+                <button
+                  id="clear-search"
+                  type="button"
+                  class="btn-secondary rounded-full px-5 py-3 text-sm font-medium"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="product-grid" class="mt-10 grid gap-8 md:grid-cols-2 xl:grid-cols-3"></div>
+
+        <div class="mt-8 text-center">
+          <button
+            id="load-more-products"
+            type="button"
+            class="btn-secondary hidden rounded-full px-6 py-3 text-sm font-medium"
+          >
+            Load More Products
+          </button>
+        </div>
+      </div>
     </section>
-</body>
+  </body>
 </html>
