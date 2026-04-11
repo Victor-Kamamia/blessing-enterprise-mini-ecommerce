@@ -63,6 +63,7 @@
         min-height: 100vh;
         display: flex;
         flex-direction: column;
+        overflow-x: hidden;
 
         /* Background image with SUBTLER gradient overlay */
         background:
@@ -100,6 +101,31 @@
       }
       .animate-fade-in.delay-200 {
         animation-delay: 0.2s;
+      }
+
+      .beauty-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.5rem;
+        height: 2.5rem;
+        overflow: hidden;
+        border-radius: 9999px;
+        border: 2px solid rgba(255, 111, 180, 0.22);
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 10px 24px rgba(45, 31, 55, 0.14);
+        vertical-align: middle;
+      }
+
+      .beauty-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .beauty-icon-sm {
+        width: 2rem;
+        height: 2rem;
       }
 
       @keyframes spin { to { transform: rotate(360deg); } }
@@ -152,6 +178,56 @@
       nav > div > div:first-child > a:last-child {
         color: #ff6fb4 !important;
         letter-spacing: 0.03em;
+      }
+
+      .nav-shell {
+        gap: 1rem;
+      }
+
+      .brand-wordmark {
+        font-size: clamp(1rem, 2vw, 1.5rem);
+        line-height: 1.1;
+      }
+
+      .mobile-menu-button {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.28rem;
+        min-height: 2.75rem;
+        min-width: 2.75rem;
+        border-radius: 9999px;
+        padding: 0.75rem;
+      }
+
+      .mobile-menu-button span {
+        display: block;
+        width: 1.15rem;
+        height: 2px;
+        border-radius: 9999px;
+        background: #ffffff;
+      }
+
+      .mobile-nav-panel {
+        border-top: 1px solid var(--brand-line);
+        background: rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow: 0 18px 38px rgba(91, 36, 128, 0.12);
+      }
+
+      .mobile-nav-link {
+        display: block;
+        border-radius: 1rem;
+        padding: 0.9rem 1rem;
+        font-weight: 500;
+        color: #58456a !important;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .mobile-nav-link:hover {
+        color: var(--brand-pink) !important;
+        background: rgba(255, 240, 247, 0.95);
       }
 
       /* ===========================
@@ -392,6 +468,81 @@
 
       /* Responsive adjustments */
       @media (max-width: 768px) {
+        nav .nav-shell {
+          align-items: center;
+          padding-top: 0.85rem;
+          padding-bottom: 0.85rem;
+        }
+
+        nav .brand-lockup {
+          min-width: 0;
+          gap: 0.75rem;
+        }
+
+        nav .brand-lockup img {
+          height: 2.8rem;
+          width: 2.8rem;
+        }
+
+        nav .brand-wordmark {
+          max-width: 11rem;
+          font-size: 0.98rem;
+          white-space: normal;
+        }
+
+        #main-content {
+          padding-top: 6.6rem;
+        }
+
+        .section-shell {
+          padding-left: 0.75rem;
+          padding-right: 0.75rem;
+        }
+
+        .products-hero {
+          padding: 1.25rem !important;
+        }
+
+        .products-toolbar {
+          padding-left: 0.9rem !important;
+          padding-right: 0.9rem !important;
+          border-radius: 1.5rem;
+        }
+
+        .products-toolbar #category-filters {
+          display: grid;
+          grid-auto-flow: column;
+          grid-auto-columns: max-content;
+          overflow-x: auto;
+          overscroll-behavior-x: contain;
+          padding-bottom: 0.3rem;
+          scrollbar-width: thin;
+        }
+
+        .products-toolbar #category-filters button {
+          white-space: nowrap;
+        }
+
+        .products-toolbar .toolbar-row {
+          grid-template-columns: 1fr;
+        }
+
+        #product-grid {
+          gap: 1.25rem !important;
+        }
+
+        #product-grid .product-card {
+          padding: 0.9rem !important;
+        }
+
+        #product-grid .product-card img {
+          height: 13.5rem !important;
+        }
+
+        #product-details-body .sticky.bottom-0 {
+          position: static;
+        }
+
         footer .grid {
           gap: 2rem;
         }
@@ -446,13 +597,13 @@
     <!-- 1. NAVIGATION BAR - Fixed at top of page      -->
     <!-- ============================================ -->
     <nav class="fixed top-0 z-50 w-full bg-white shadow-[0_16px_40px_rgba(15,23,42,0.12)]">
-      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+      <div class="nav-shell mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
         <!-- Logo and Brand Name -->
-        <div class="flex items-center gap-4">
+        <div class="brand-lockup flex items-center gap-4">
           <a href="#" onclick="loadPage('pages/dashboard.html')" class="flex items-center">
             <img src="imag/favicon.png" alt="Blessing Enterprise" class="h-14 w-14 object-contain" />
           </a>
-          <a href="#" onclick="loadPage('pages/dashboard.html')" class="text-2xl font-bold transition hover:text-pink-500" style="color: #ff6fb4 !important;">
+          <a href="#" onclick="closeMobileMenu(); loadPage('pages/dashboard.html')" class="brand-wordmark text-2xl font-bold transition hover:text-pink-500" style="color: #ff6fb4 !important;">
             BLESSING ENTERPRISE
           </a>
         </div>
@@ -470,6 +621,34 @@
           <button onclick="openCart()" class="rounded-lg bg-primary px-4 py-2 shadow transition hover:scale-105">
             Cart (<span id="cart-count">0</span>)
           </button>
+        </div>
+
+        <div class="flex items-center gap-2 md:hidden">
+          <button onclick="openCart()" class="rounded-full bg-primary px-4 py-2 text-sm font-medium shadow transition hover:scale-105">
+            Cart (<span id="cart-count-mobile">0</span>)
+          </button>
+          <button
+            id="mobile-menu-toggle"
+            type="button"
+            class="mobile-menu-button rounded-full bg-primary shadow transition hover:scale-105"
+            aria-controls="mobile-nav-panel"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </div>
+
+      <div id="mobile-nav-panel" class="mobile-nav-panel hidden px-4 pb-4 md:hidden">
+        <div class="grid gap-2">
+          <a href="#" onclick="closeMobileMenu(); loadPage('pages/dashboard.html')" class="mobile-nav-link transition">Home</a>
+          <a href="#" onclick="closeMobileMenu(); loadPage('pages/products.html')" class="mobile-nav-link transition">Shop</a>
+          <a href="#" onclick="closeMobileMenu(); openCategory('Offers')" class="mobile-nav-link transition">Offers</a>
+          <a href="#" onclick="closeMobileMenu(); loadPage('pages/contact.html')" class="mobile-nav-link transition">Contact</a>
+          <a href="#" onclick="closeMobileMenu(); loadPage('pages/about.html')" class="mobile-nav-link transition">About Us</a>
         </div>
       </div>
     </nav>
@@ -765,6 +944,7 @@
                 <li><a href="#" onclick="loadPage('pages/products.html')" class="contact-link text-slate-100 hover:text-pink-200">🛍️ Shop</a></li>
                 <li><a href="#" onclick="loadPage('pages/about.html')" class="contact-link text-slate-100 hover:text-pink-200">📖 About Us</a></li>
                 <li><a href="#" onclick="loadPage('pages/contact.html')" class="contact-link text-slate-100 hover:text-pink-200">📞 Contact</a></li>
+                <li><a href="#" onclick="loadPage('pages/admin.html')" class="contact-link text-slate-100 hover:text-pink-200">🧾 Admin</a></li>
                 <li><a href="#" onclick="openCategory('Offers')" class="contact-link text-slate-100 hover:text-pink-200">🎉 Special Offers</a></li>
               </ul>
             </div>

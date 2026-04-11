@@ -1,0 +1,45 @@
+[
+  {
+    "id": "ORD-20260409-0001",
+    "reference": "ORD-20260409-0001",
+    "status": "pending",
+    "source": "website",
+    "createdAt": "2026-04-09T11:38:13+00:00",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "address": "lanet umoja"
+    },
+    "items": [
+      {
+        "id": 5,
+        "name": "Vitamin C Glow Serum",
+        "category": "Facials",
+        "image": "imag/vitamin-c-serum.png",
+        "quantity": 2,
+        "unitPrice": 15.0,
+        "lineTotal": 30.0
+      },
+      {
+        "id": 8,
+        "name": "Shea Butter Hand Cream",
+        "category": "Handcare",
+        "image": "imag/hand-cream.png",
+        "quantity": 1,
+        "unitPrice": 25.0,
+        "lineTotal": 25.0
+      },
+      {
+        "id": 2,
+        "name": "Luxury Matte Lipstick",
+        "category": "Lips",
+        "image": "imag/lipstick.png",
+        "quantity": 4,
+        "unitPrice": 15.0,
+        "lineTotal": 60.0
+      }
+    ],
+    "totalAmount": 115.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260409-0001\nMy name is: victor kamamia\nPhone: 0111554776\n\nI would like to place an order:\n\n1. Vitamin C Glow Serum (x2) - $30.00\n2. Shea Butter Hand Cream (x1) - $25.00\n3. Luxury Matte Lipstick (x4) - $60.00\n\nTotal: $115.00\n\nDelivery Address:\nlanet umoja\n\nThank you!"
+  }
+]

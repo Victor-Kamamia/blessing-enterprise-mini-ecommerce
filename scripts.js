@@ -1,7 +1,9 @@
 const STORAGE_KEYS={cart:"cart",favorites:"favorites",newsletterSubscribers:"newsletterSubscribers",loyaltyMembers:"loyaltyMembers",recentlyViewed:"recentlyViewed",newsletterShown:"newsletterShown"};
-const SESSION_KEYS={activeCategory:"activeCategory",productSearchQuery:"productSearchQuery",productSortOption:"productSortOption"};
-const APP_PAGES={home:"pages/dashboard.html",products:"pages/products.html"};
+const SESSION_KEYS={activeCategory:"activeCategory",productSearchQuery:"productSearchQuery",productSortOption:"productSortOption",adminToken:"adminToken",adminUsername:"adminUsername"};
+const APP_PAGES={home:"pages/dashboard.html",products:"pages/products.html",admin:"pages/admin.html"};
 const WHATSAPP_NUMBER="254711490385";
+const API_ORIGIN=window.location.protocol==="file:"?"http://127.0.0.1:8000":window.location.origin;
+const API_BASE=`${API_ORIGIN}/api`;
 const PRODUCT_BATCH_SIZE=6;
 const QUICK_VIEW_FALLBACK_ID=2;
 const CATEGORY_ALIAS_MAP={Lipstick:"Lips",Foundation:"Facials",Mascara:"Lips",Skincare:"Facials",Eyeshadow:"Bodycare"};
@@ -29,10 +31,279 @@ function readStoredArray(key){try{const raw=localStorage.getItem(key);if(!raw)re
 function writeStoredArray(key,value){localStorage.setItem(key,JSON.stringify(value));}
 function readSessionValue(key,fallback){try{return sessionStorage.getItem(key)??fallback;}catch(error){console.warn(`Unable to read session key "${key}"`,error);return fallback;}}
 function writeSessionValue(key,value){sessionStorage.setItem(key,value);}
+function removeSessionValue(key){sessionStorage.removeItem(key);}
 function getProductById(id){return products.find((product)=>product.id===Number(id))||null;}
 function formatCurrency(amount){return Number(amount).toFixed(2);}
+function formatDateTime(value){const date=new Date(value);if(Number.isNaN(date.getTime()))return value||"Not available";return new Intl.DateTimeFormat("en-KE",{dateStyle:"medium",timeStyle:"short"}).format(date);}
 function getMainContent(){return document.getElementById("main-content");}
 function escapeHtml(value){return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");}
+function getAdminToken(){return readSessionValue(SESSION_KEYS.adminToken,"");}
+function getAdminUsername(){return readSessionValue(SESSION_KEYS.adminUsername,"admin");}
+function isAdminAuthenticated(){return Boolean(getAdminToken());}
+function saveAdminSession(token,username){writeSessionValue(SESSION_KEYS.adminToken,token);writeSessionValue(SESSION_KEYS.adminUsername,username||"admin");}
+function clearAdminSession(){removeSessionValue(SESSION_KEYS.adminToken);removeSessionValue(SESSION_KEYS.adminUsername);}
+function syncProductCatalog(items){
+  if(!Array.isArray(items)||items.length===0)return false;
+  const normalizedItems=items.map((item)=>withCategoryDetails(item));
+  products.splice(0,products.length,...normalizedItems);
+  productCategories.splice(0,productCategories.length,"All",...new Set(normalizedItems.map((item)=>item.category)));
+  preloadImages();
+  return true;
+}
+async function apiRequest(path,options={}){
+  const adminToken=getAdminToken();
+  const headers={Accept:"application/json",...(options.body?{"Content-Type":"application/json"}:{}),...(adminToken?{Authorization:`Bearer ${adminToken}`}:{}) ,...(options.headers||{})};
+  const response=await fetch(`${API_BASE}${path}`,{...options,headers});
+  const contentType=response.headers.get("content-type")||"";
+  const payload=contentType.includes("application/json")?await response.json():await response.text();
+  if(!response.ok){
+    const message=payload&&typeof payload==="object"&&payload.error?payload.error:`Request failed with status ${response.status}`;
+    throw new Error(message);
+  }
+  return payload;
+}
+async function syncProductsFromApi(){
+  try{
+    const payload=await apiRequest("/products");
+    if(syncProductCatalog(payload.items)&&state.currentPage.includes("products.html"))renderProducts();
+  }catch(error){
+    console.warn("Unable to sync product catalog from the backend.",error);
+  }
+}
+function setAdminProductStatus(message,type="info"){
+  const status=document.getElementById("admin-product-status");
+  if(!status)return;
+  if(!message){status.className="hidden";status.textContent="";return;}
+  const styles={
+    success:"mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700",
+    error:"mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700",
+    info:"mt-5 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-700"
+  };
+  status.className=styles[type]||styles.info;
+  status.textContent=message;
+}
+function setAdminAuthStatus(message,type="info"){
+  const status=document.getElementById("admin-auth-status");
+  if(!status)return;
+  if(!message){status.className="hidden";status.textContent="";return;}
+  const styles={
+    success:"mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700",
+    error:"mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700",
+    info:"mt-5 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-700"
+  };
+  status.className=styles[type]||styles.info;
+  status.textContent=message;
+}
+function toggleAdminPanels(isAuthenticated){
+  const authPanel=document.getElementById("admin-auth-panel");
+  const dashboardPanel=document.getElementById("admin-dashboard-shell");
+  const welcomeLabel=document.getElementById("admin-welcome-name");
+  if(authPanel)authPanel.classList.toggle("hidden",isAuthenticated);
+  if(dashboardPanel)dashboardPanel.classList.toggle("hidden",!isAuthenticated);
+  if(welcomeLabel)welcomeLabel.textContent=getAdminUsername();
+}
+function handleAdminAuthFailure(message="Please sign in to continue."){
+  clearAdminSession();
+  toggleAdminPanels(false);
+  setAdminProductStatus("","info");
+  setAdminAuthStatus(message,"error");
+}
+function renderAdminSummary(productsPayload,newsletterPayload){
+  const productCount=document.getElementById("admin-products-count");
+  const subscriberCount=document.getElementById("admin-subscribers-count");
+  const categoryCount=document.getElementById("admin-categories-count");
+  const latestProduct=document.getElementById("admin-latest-product");
+  const productItems=Array.isArray(productsPayload?.items)?productsPayload.items:[];
+  const newsletterItems=Array.isArray(newsletterPayload?.items)?newsletterPayload.items:[];
+  const categories=new Set(productItems.map((item)=>item.category).filter(Boolean));
+  if(productCount)productCount.textContent=String(productsPayload?.count??productItems.length);
+  if(subscriberCount)subscriberCount.textContent=String(newsletterPayload?.count??newsletterItems.length);
+  if(categoryCount)categoryCount.textContent=String(categories.size);
+  if(latestProduct)latestProduct.textContent=productItems.length?productItems[productItems.length-1].name:"No products yet";
+}
+function renderAdminProducts(items){
+  const container=document.getElementById("admin-product-list");
+  if(!container)return;
+  if(!Array.isArray(items)||items.length===0){
+    container.innerHTML='<div class="rounded-[1.5rem] border border-dashed border-violet-200 bg-white/80 px-5 py-8 text-center text-sm text-gray-500">No products found yet.</div>';
+    return;
+  }
+  const sorted=[...items].sort((left,right)=>Number(right.id)-Number(left.id));
+  container.innerHTML=sorted.map((product)=>`<article class="interactive-card rounded-[1.5rem] bg-white p-4 shadow-soft"><div class="flex gap-4"><img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="h-20 w-20 rounded-2xl object-cover bg-rose-50" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='imag/favicon.png';"><div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2"><span class="rounded-full bg-rose-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-rose-600">${escapeHtml(product.category||"General")}</span>${product.offer?`<span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">${escapeHtml(product.offer.label||"Offer")}</span>`:""}</div><h3 class="mt-3 text-lg font-semibold text-[var(--brand-ink)]">${escapeHtml(product.name)}</h3><p class="mt-2 text-sm leading-6 text-gray-600">${escapeHtml(product.description||"")}</p><div class="mt-3 flex flex-wrap items-center gap-3 text-sm"><span class="font-semibold text-rose-700">$${formatCurrency(product.price||0)}</span><span class="text-gray-400">ID ${escapeHtml(product.id)}</span></div></div></div></article>`).join("");
+}
+function renderAdminSubscribers(items){
+  const container=document.getElementById("admin-subscriber-list");
+  const total=document.getElementById("admin-subscriber-total");
+  if(total)total.textContent=String(Array.isArray(items)?items.length:0);
+  if(!container)return;
+  if(!Array.isArray(items)||items.length===0){
+    container.innerHTML='<div class="rounded-[1.5rem] border border-dashed border-violet-200 bg-white/80 px-5 py-8 text-center text-sm text-gray-500">No subscribers yet. Newsletter signups will appear here.</div>';
+    return;
+  }
+  container.innerHTML=items.map((subscriber)=>`<article class="rounded-[1.35rem] border border-white/70 bg-white/90 px-4 py-4 shadow-soft"><p class="text-sm font-semibold text-[var(--brand-ink)] break-all">${escapeHtml(subscriber.email||"Unknown email")}</p><p class="mt-2 text-xs uppercase tracking-[0.18em] text-violet-700">Joined ${escapeHtml(formatDateTime(subscriber.createdAt))}</p></article>`).join("");
+}
+function buildAdminProductPayload(form){
+  const formData=new FormData(form);
+  const offerEnabled=formData.get("offerEnabled")==="on";
+  return{
+    name:String(formData.get("name")||"").trim(),
+    category:String(formData.get("category")||"").trim(),
+    description:String(formData.get("description")||"").trim(),
+    price:String(formData.get("price")||"").trim(),
+    image:String(formData.get("image")||"").trim(),
+    usage:String(formData.get("usage")||"").trim(),
+    benefits:String(formData.get("benefits")||"").trim(),
+    ingredients:String(formData.get("ingredients")||"").trim(),
+    offer:offerEnabled?{
+      label:String(formData.get("offerLabel")||"").trim(),
+      originalPrice:String(formData.get("offerOriginalPrice")||"").trim()
+    }:null
+  };
+}
+async function loadAdminDashboard(){
+  if(!isAdminAuthenticated()){
+    toggleAdminPanels(false);
+    setAdminAuthStatus("Sign in with your admin credentials to manage products and see subscribers.","info");
+    return;
+  }
+  const productList=document.getElementById("admin-product-list");
+  const subscriberList=document.getElementById("admin-subscriber-list");
+  if(productList)productList.innerHTML='<div class="rounded-[1.5rem] bg-white px-5 py-8 text-center text-sm text-gray-500 shadow-soft">Loading products...</div>';
+  if(subscriberList)subscriberList.innerHTML='<div class="rounded-[1.5rem] bg-white px-5 py-8 text-center text-sm text-gray-500 shadow-soft">Loading subscribers...</div>';
+  try{
+    const [productsPayload,newsletterPayload]=await Promise.all([apiRequest("/products"),apiRequest("/newsletter")]);
+    syncProductCatalog(productsPayload.items);
+    renderAdminSummary(productsPayload,newsletterPayload);
+    renderAdminProducts(productsPayload.items);
+    renderAdminSubscribers(newsletterPayload.items);
+    const categoryOptions=document.getElementById("admin-category-options");
+    if(categoryOptions){
+      categoryOptions.innerHTML=[...new Set((productsPayload.items||[]).map((item)=>item.category).filter(Boolean))].sort((left,right)=>left.localeCompare(right)).map((category)=>`<option value="${escapeHtml(category)}"></option>`).join("");
+    }
+    toggleAdminPanels(true);
+    setAdminAuthStatus("","info");
+    setAdminProductStatus("Connected to the backend. New products will be saved to data/products.json.","info");
+  }catch(error){
+    console.error(error);
+    if(error.message&&error.message.toLowerCase().includes("admin")){
+      handleAdminAuthFailure(error.message);
+      return;
+    }
+    renderAdminSummary({items:products,count:products.length},{items:[],count:0});
+    renderAdminProducts(products);
+    renderAdminSubscribers([]);
+    setAdminProductStatus("Admin tools need the backend running. Start it with: python backend/server.py","error");
+  }
+}
+async function submitAdminLoginForm(event){
+  event.preventDefault();
+  const form=event.target;
+  const submitButton=form.querySelector('button[type="submit"]');
+  const originalLabel=submitButton?submitButton.textContent:"Sign In";
+  const username=String(form.username.value||"").trim();
+  const password=String(form.password.value||"");
+  if(submitButton){submitButton.disabled=true;submitButton.textContent="Signing In...";}
+  setAdminAuthStatus("Checking your admin credentials...","info");
+  try{
+    const payload=await apiRequest("/admin/login",{method:"POST",body:JSON.stringify({username,password}),headers:{Authorization:""}});
+    saveAdminSession(payload.token,payload.session?.username||username);
+    form.reset();
+    toggleAdminPanels(true);
+    setAdminAuthStatus("Signed in successfully.","success");
+    await loadAdminDashboard();
+  }catch(error){
+    console.error(error);
+    handleAdminAuthFailure(error.message||"Unable to sign in right now.");
+  }finally{
+    if(submitButton){submitButton.disabled=false;submitButton.textContent=originalLabel;}
+  }
+}
+async function logoutAdmin(){
+  try{
+    if(isAdminAuthenticated())await apiRequest("/admin/logout",{method:"POST"});
+  }catch(error){
+    console.warn("Unable to complete backend logout cleanly.",error);
+  }finally{
+    clearAdminSession();
+    toggleAdminPanels(false);
+    setAdminProductStatus("","info");
+    setAdminAuthStatus("You have been signed out.","info");
+  }
+}
+async function submitAdminProductForm(event){
+  event.preventDefault();
+  const form=event.target;
+  const submitButton=form.querySelector('button[type="submit"]');
+  const originalLabel=submitButton?submitButton.textContent:"Save Product";
+  const payload=buildAdminProductPayload(form);
+  if(submitButton){submitButton.disabled=true;submitButton.textContent="Saving...";}
+  setAdminProductStatus("Saving product...","info");
+  try{
+    const response=await apiRequest("/products",{method:"POST",body:JSON.stringify(payload)});
+    await syncProductsFromApi();
+    await loadAdminDashboard();
+    form.reset();
+    showToast(response.message||"Product added successfully.");
+    setAdminProductStatus(response.message||"Product added successfully.","success");
+  }catch(error){
+    console.error(error);
+    if(error.message&&error.message.toLowerCase().includes("admin")){
+      handleAdminAuthFailure(error.message);
+      return;
+    }
+    setAdminProductStatus(error.message||"Unable to save product right now.","error");
+  }finally{
+    if(submitButton){submitButton.disabled=false;submitButton.textContent=originalLabel;}
+  }
+}
+function initAdminPage(){
+  const loginForm=document.getElementById("admin-login-form");
+  const form=document.getElementById("admin-product-form");
+  const refreshButton=document.getElementById("admin-refresh-button");
+  const logoutButton=document.getElementById("admin-logout-button");
+  if(loginForm&&loginForm.dataset.bound!=="true"){
+    loginForm.dataset.bound="true";
+    loginForm.addEventListener("submit",submitAdminLoginForm);
+  }
+  if(form&&form.dataset.bound!=="true"){
+    form.dataset.bound="true";
+    form.addEventListener("submit",submitAdminProductForm);
+  }
+  if(refreshButton&&refreshButton.dataset.bound!=="true"){
+    refreshButton.dataset.bound="true";
+    refreshButton.addEventListener("click",()=>loadAdminDashboard());
+  }
+  if(logoutButton&&logoutButton.dataset.bound!=="true"){
+    logoutButton.dataset.bound="true";
+    logoutButton.addEventListener("click",logoutAdmin);
+  }
+  toggleAdminPanels(isAdminAuthenticated());
+  if(isAdminAuthenticated()){
+    loadAdminDashboard();
+    return;
+  }
+  setAdminAuthStatus("Sign in with your admin credentials to manage products and see subscribers.","info");
+}
+function getCartItemsPayload(){return state.cart.map(({id,quantity})=>({id,quantity}));}
+function buildCheckoutMessage({name,phone,address,reference=""}){
+  const orderLines=state.cart.map((item,index)=>`${index+1}. ${item.name} (x${item.quantity}) - $${formatCurrency(item.price*item.quantity)}`);
+  const header=reference?[`Order Ref: ${reference}`]:[];
+  return["Hello BLESSING ENTERPRISE,","",...header,`My name is: ${name}`,`Phone: ${phone}`,"","I would like to place an order:","",...orderLines,"",`Total: $${formatCurrency(getCartTotal())}`,"","Delivery Address:",address,"","Thank you!"].join("\n");
+}
+function saveNewsletterFallback(email){
+  const subscribers=readStoredArray(STORAGE_KEYS.newsletterSubscribers);
+  if(subscribers.includes(email)){alert("You are already subscribed to our newsletter.");return false;}
+  subscribers.push(email);
+  writeStoredArray(STORAGE_KEYS.newsletterSubscribers,subscribers);
+  return true;
+}
+function saveLoyaltyFallback(phone){
+  const loyaltyMembers=readStoredArray(STORAGE_KEYS.loyaltyMembers);
+  if(loyaltyMembers.includes(phone)){alert("You are already a loyalty member.");return false;}
+  loyaltyMembers.push(phone);
+  writeStoredArray(STORAGE_KEYS.loyaltyMembers,loyaltyMembers);
+  return true;
+}
 
 function getVisibleOverlayCount(){
   return document.querySelectorAll("#cart-modal:not(.hidden), #product-details-modal:not(.hidden), #checkout-modal:not(.hidden), #beauty-quiz-modal:not(.hidden), #newsletter-popup:not(.hidden)").length;
@@ -40,6 +311,26 @@ function getVisibleOverlayCount(){
 function syncBodyScrollLock(){document.body.classList.toggle("modal-open",getVisibleOverlayCount()>0);}
 function openOverlay(modal){if(!modal)return;modal.classList.remove("hidden");modal.classList.add("flex");syncBodyScrollLock();}
 function closeOverlay(modal){if(!modal)return;modal.classList.add("hidden");modal.classList.remove("flex");syncBodyScrollLock();}
+function getMobileMenuPanel(){return document.getElementById("mobile-nav-panel");}
+function getMobileMenuToggle(){return document.getElementById("mobile-menu-toggle");}
+function closeMobileMenu(){
+  const panel=getMobileMenuPanel();
+  const toggle=getMobileMenuToggle();
+  if(panel)panel.classList.add("hidden");
+  if(toggle)toggle.setAttribute("aria-expanded","false");
+}
+function openMobileMenu(){
+  const panel=getMobileMenuPanel();
+  const toggle=getMobileMenuToggle();
+  if(panel)panel.classList.remove("hidden");
+  if(toggle)toggle.setAttribute("aria-expanded","true");
+}
+function toggleMobileMenu(){
+  const panel=getMobileMenuPanel();
+  if(!panel)return;
+  if(panel.classList.contains("hidden")){openMobileMenu();return;}
+  closeMobileMenu();
+}
 
 function setFieldError(fieldId,message){
   const field=document.getElementById(fieldId);
@@ -202,7 +493,7 @@ function renderProducts(){
     const card=document.createElement("article");
     card.className="interactive-card product-card group overflow-hidden rounded-[1.75rem] bg-white p-4 shadow-soft backdrop-blur-sm";
     card.dataset.productId=String(product.id);
-    card.innerHTML=`<div class="mb-3 flex items-center justify-between"><div class="flex flex-wrap gap-2"><span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600">${escapeHtml(product.category)}</span>${product.offer?`<span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">${escapeHtml(product.offer.label)}</span>`:""}</div>${getFavoriteButtonMarkup(product.id)}</div><button type="button" onclick="openProductDetails(${product.id})" class="block w-full text-left"><div class="relative overflow-hidden rounded-[1.4rem] bg-gradient-to-b from-pink-50 to-violet-100 p-4"><img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="h-64 w-full rounded-[1.2rem] object-cover transition duration-500 group-hover:scale-105" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='imag/favicon.png';"></div><div class="px-2 pb-2 pt-5"><div class="mb-3 flex items-start justify-between gap-3"><div><h3 class="text-xl font-semibold text-rose-700">${escapeHtml(product.name)}</h3><p class="mt-2 text-sm leading-6 text-gray-500">${escapeHtml(product.description)}</p></div>${getPriceMarkup(product,true)}</div></div></button><button type="button" onclick="addToCart(${product.id})" class="btn-primary w-full rounded-2xl px-4 py-3 text-sm font-medium text-white">Add to Cart</button>`;
+    card.innerHTML=`<div class="mb-3 flex items-center justify-between gap-3"><div class="flex flex-wrap gap-2"><span class="inline-flex rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-rose-600">${escapeHtml(product.category)}</span>${product.offer?`<span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-amber-700">${escapeHtml(product.offer.label)}</span>`:""}</div>${getFavoriteButtonMarkup(product.id)}</div><button type="button" onclick="openProductDetails(${product.id})" class="block w-full text-left"><div class="relative overflow-hidden rounded-[1.4rem] bg-gradient-to-b from-pink-50 to-violet-100 p-3 sm:p-4"><img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="h-56 w-full rounded-[1.2rem] object-cover transition duration-500 group-hover:scale-105 sm:h-64" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='imag/favicon.png';"></div><div class="px-1 pb-2 pt-4 sm:px-2 sm:pt-5"><div class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between"><div><h3 class="text-lg font-semibold text-rose-700 sm:text-xl">${escapeHtml(product.name)}</h3><p class="mt-2 text-sm leading-6 text-gray-500">${escapeHtml(product.description)}</p></div>${getPriceMarkup(product,true)}</div></div></button><button type="button" onclick="addToCart(${product.id})" class="btn-primary w-full rounded-2xl px-4 py-3 text-sm font-medium text-white">Add to Cart</button>`;
     fragment.appendChild(card);
   });
   grid.replaceChildren(fragment);
@@ -301,7 +592,7 @@ function checkout(){
   openCheckoutModal();
 }
 
-function submitCheckoutForm(event){
+async function submitCheckoutForm(event){
   event.preventDefault();
   if(state.cart.length===0){closeCheckoutModal();return;}
   const form=event.target;
@@ -316,10 +607,26 @@ function submitCheckoutForm(event){
   if(!phone){setFieldError("customer-phone","Please enter your phone number.");hasError=true;}else if(!phoneValid){setFieldError("customer-phone","Use a valid phone number with 10 to 15 digits.");hasError=true;}
   if(!address){setFieldError("customer-address","Please enter your delivery address.");hasError=true;}
   if(hasError){setCheckoutStatus("Please correct the highlighted fields before continuing.","error");return;}
-  const lines=state.cart.map((item,index)=>`${index+1}. ${item.name} (x${item.quantity}) - $${formatCurrency(item.price*item.quantity)}`);
-  const message=["Hello BLESSING ENTERPRISE,","",`My name is: ${name}`,`Phone: ${normalizedPhone}`,"","I would like to place an order:","",...lines,"",`Total: $${formatCurrency(getCartTotal())}`,"","Delivery Address:",address,"","Thank you!"].join("\n");
-  setCheckoutStatus("Order details ready. Opening WhatsApp...","success");
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,"_blank");
+  const fallbackMessage=buildCheckoutMessage({name,phone:normalizedPhone,address});
+  let whatsappUrl=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(fallbackMessage)}`;
+  try{
+    setCheckoutStatus("Saving your order...","success");
+    const payload=await apiRequest("/orders",{
+      method:"POST",
+      body:JSON.stringify({
+        customer:{name,phone:normalizedPhone,address},
+        items:getCartItemsPayload(),
+        source:"website"
+      })
+    });
+    const orderReference=payload.order&&payload.order.reference?payload.order.reference:"";
+    whatsappUrl=payload.whatsappUrl||`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildCheckoutMessage({name,phone:normalizedPhone,address,reference:orderReference}))}`;
+    setCheckoutStatus(orderReference?`Order ${orderReference} saved. Opening WhatsApp...`:"Order saved. Opening WhatsApp...","success");
+  }catch(error){
+    console.error(error);
+    setCheckoutStatus("Backend unavailable, opening WhatsApp checkout instead.","error");
+  }
+  window.open(whatsappUrl,"_blank");
   state.cart=[];
   persistCart();
   window.setTimeout(()=>{form.reset();closeCheckoutModal();closeCart();},900);
@@ -407,17 +714,21 @@ function submitBeautyQuiz(event){
   results.classList.remove("hidden");
 }
 
-function signupLoyalty(){
+async function signupLoyalty(){
   const phone=prompt("Enter your phone number to join our loyalty program:");
   if(!phone)return;
   const normalizedPhone=phone.replace(/[^\d+]/g,"").trim();
   const digitsOnly=normalizedPhone.replace(/\D/g,"");
   if(digitsOnly.length<10||digitsOnly.length>15){alert("Please enter a valid phone number with 10 to 15 digits.");return;}
-  const loyaltyMembers=readStoredArray(STORAGE_KEYS.loyaltyMembers);
-  if(loyaltyMembers.includes(normalizedPhone)){alert("You are already a loyalty member.");return;}
-  loyaltyMembers.push(normalizedPhone);
-  writeStoredArray(STORAGE_KEYS.loyaltyMembers,loyaltyMembers);
-  showToast("You have joined the loyalty program.");
+  try{
+    const payload=await apiRequest("/loyalty/join",{method:"POST",body:JSON.stringify({phone:normalizedPhone})});
+    if(payload.alreadyMember){alert(payload.message);return;}
+    showToast(payload.message||"You have joined the loyalty program.");
+  }catch(error){
+    console.error(error);
+    if(!saveLoyaltyFallback(normalizedPhone))return;
+    showToast("Saved locally. Start the backend to sync loyalty members centrally.");
+  }
 }
 
 function scrollToProduct(productId){
@@ -459,14 +770,20 @@ function clearRecentlyViewed(){
 
 function closeNewsletterPopup(){closeOverlay(document.getElementById("newsletter-popup"));}
 
-function handleNewsletterSubmit(email){
+async function handleNewsletterSubmit(email){
   const normalizedEmail=email.trim().toLowerCase();
   if(!normalizedEmail)return;
-  const subscribers=readStoredArray(STORAGE_KEYS.newsletterSubscribers);
-  if(subscribers.includes(normalizedEmail)){alert("You are already subscribed to our newsletter.");return;}
-  subscribers.push(normalizedEmail);
-  writeStoredArray(STORAGE_KEYS.newsletterSubscribers,subscribers);
-  showToast("Thanks for subscribing. Your welcome offer is on the way.");
+  const emailValid=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+  if(!emailValid){alert("Please enter a valid email address.");return;}
+  try{
+    const payload=await apiRequest("/newsletter/subscribe",{method:"POST",body:JSON.stringify({email:normalizedEmail})});
+    if(payload.alreadySubscribed){alert(payload.message);return;}
+    showToast(payload.message||"Thanks for subscribing. Your welcome offer is on the way.");
+  }catch(error){
+    console.error(error);
+    if(!saveNewsletterFallback(normalizedEmail))return;
+    showToast("Saved locally. Start the backend to keep newsletter signups in one place.");
+  }
 }
 
 function showStockAlert(){
@@ -531,13 +848,15 @@ function fetchPageContent(page){
 function handlePageReady(page){
   state.currentPage=page;
   const isProductsPage=page.includes("products.html");
+  const isAdminPage=page.includes("admin.html");
   const stockAlert=document.getElementById("stock-alert");
   if(!isProductsPage)productsRendered=false;
   if(isProductsPage)renderProducts();
+  if(isAdminPage)initAdminPage();
   if(page===APP_PAGES.home){initHomepageFeatures();}else{stopHomepageTimers();if(stockAlert)stockAlert.classList.add("hidden");}
   updateCartUI();
   updateFavoritesUI();
-  displayRecentlyViewed();
+  if(!isAdminPage)displayRecentlyViewed();
 }
 
 function loadPage(page){
@@ -569,13 +888,30 @@ function bindStaticEvents(){
   if(checkoutForm&&checkoutForm.dataset.bound!=="true"){checkoutForm.dataset.bound="true";checkoutForm.addEventListener("submit",submitCheckoutForm);}
   const beautyQuizForm=document.getElementById("beauty-quiz-form");
   if(beautyQuizForm&&beautyQuizForm.dataset.bound!=="true"){beautyQuizForm.dataset.bound="true";beautyQuizForm.addEventListener("submit",submitBeautyQuiz);}
+  const mobileMenuToggle=getMobileMenuToggle();
+  if(mobileMenuToggle&&mobileMenuToggle.dataset.bound!=="true"){
+    mobileMenuToggle.dataset.bound="true";
+    mobileMenuToggle.addEventListener("click",toggleMobileMenu);
+  }
   [{id:"cart-modal",close:closeCart},{id:"product-details-modal",close:closeProductDetails},{id:"checkout-modal",close:closeCheckoutModal},{id:"beauty-quiz-modal",close:closeBeautyQuiz},{id:"newsletter-popup",close:closeNewsletterPopup}].forEach(({id,close})=>{
     const modal=document.getElementById(id);
     if(!modal||modal.dataset.bound==="true")return;
     modal.dataset.bound="true";
     modal.addEventListener("click",(event)=>{if(event.target===modal)close();});
   });
-  document.addEventListener("keydown",(event)=>{if(event.key!=="Escape"||getVisibleOverlayCount()===0)return;closeNewsletterPopup();closeBeautyQuiz();closeProductDetails();closeCheckoutModal();closeCart();});
+  document.addEventListener("keydown",(event)=>{
+    if(event.key!=="Escape")return;
+    closeMobileMenu();
+    if(getVisibleOverlayCount()===0)return;
+    closeNewsletterPopup();closeBeautyQuiz();closeProductDetails();closeCheckoutModal();closeCart();
+  });
+  document.addEventListener("click",(event)=>{
+    const panel=getMobileMenuPanel();
+    const toggle=getMobileMenuToggle();
+    if(!panel||panel.classList.contains("hidden"))return;
+    if(panel.contains(event.target)||toggle&&toggle.contains(event.target))return;
+    closeMobileMenu();
+  });
   document.addEventListener("click",(event)=>{const anchor=event.target.closest('a[href="#"]');if(anchor)event.preventDefault();});
   document.addEventListener("submit",(event)=>{
     const form=event.target;
@@ -595,13 +931,16 @@ function bindStaticEvents(){
     openOverlay(popup);
     localStorage.setItem(STORAGE_KEYS.newsletterShown,"true");
   });
+  window.addEventListener("resize",()=>{if(window.innerWidth>=768)closeMobileMenu();});
 }
 
-function initApp(){
+async function initApp(){
   bindStaticEvents();
   updateCartUI();
   updateFavoritesUI();
   displayRecentlyViewed();
+  closeMobileMenu();
+  await syncProductsFromApi();
   loadPage(APP_PAGES.home);
 }
 
@@ -631,3 +970,4 @@ window.scrollToProduct=scrollToProduct;
 window.signupLoyalty=signupLoyalty;
 window.clearRecentlyViewed=clearRecentlyViewed;
 window.updateCartUI=updateCartUI;
+window.closeMobileMenu=closeMobileMenu;
