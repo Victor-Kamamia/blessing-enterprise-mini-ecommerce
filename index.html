@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BLESSING ENTERPRISE | Cosmetics</title>
+
+    <meta
+      name="description"
+      content="BLESSING ENTERPRISE - Enhancing Beauty, Empowering Confidence. Shop premium cosmetics via WhatsApp."
+    />
+
+    <link rel="icon" href="imag/favicon.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#f8c8dc",
+              nude: "#f5e6da",
+            },
+          },
+        },
+      };
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="image" href="imag/favicon.png" />
+    <link rel="preload" as="image" href="imag/serum.png" />
+    <link rel="preload" as="image" href="imag/lipstick.png" />
+
+    <style>
+      /* ===========================
+   Global & Root Variables
+   =========================== */
+      :root {
+        --brand-pink: #ff6fb4;
+        --brand-pink-soft: #fff0f7;
+        --brand-purple: #8e44ad;
+        --brand-purple-deep: #6e2f95;
+        --brand-lilac: #f3ebff;
+        --brand-ink: #2d1f37;
+        --brand-muted: #6c5b77;
+        --brand-line: rgba(142, 68, 173, 0.12);
+      }
+
+      /* ===========================
+        HTML & Body
+        =========================== */
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+
+        /* Background image with SUBTLER gradient overlay */
+        background:
+          linear-gradient(
+            135deg,
+            rgba(255, 21, 130, 0.05),
+            rgba(145, 60, 220, 0.05)
+          ),
+          url("imag/background1.png") center / cover no-repeat;
+
+        background-blend-mode: normal;
+        color: var(--brand-ink);
+      }
+
+      body.modal-open {
+        overflow: hidden;
+      }
+
+      /* ===========================
+        Headings
+        =========================== */
+      h1, h2, h3 {
+        font-family: "Playfair Display", serif;
+      }
+
+      /* ===========================
+        Animations
+        =========================== */
+      @keyframes fadeIn {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-in {
+        animation: fadeIn 1s ease forwards;
+      }
+      .animate-fade-in.delay-200 {
+        animation-delay: 0.2s;
+      }
+
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .animate-spin {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+      .skeleton {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+      }
+
+      /* ===========================
+        Navigation Bar - More Transparent
+        =========================== */
+      nav {
+        background: rgba(255, 255, 255, 0.85) !important;
+        border-bottom: 1px solid var(--brand-line);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+      }
+
+      nav a, nav button, nav span {
+        color: #222222 !important;
+      }
+
+      nav a:hover, nav button:hover {
+        color: var(--brand-purple) !important;
+      }
+
+      nav button {
+        background: linear-gradient(135deg, var(--brand-purple), var(--brand-pink)) !important;
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: 0 14px 30px rgba(142, 68, 173, 0.18);
+      }
+
+      nav ul a {
+        color: #58456a !important;
+        font-weight: 500;
+      }
+      nav ul a:hover { color: var(--brand-pink) !important; }
+
+      /* Make "BLESSING ENTERPRISE" text pink */
+      nav > div > div:first-child > a:last-child {
+        color: #ff6fb4 !important;
+        letter-spacing: 0.03em;
+      }
+
+      /* ===========================
+        Panels & Main Content - MORE TRANSPARENT to show background
+        =========================== */
+      #main-content,
+      .overlay-panel,
+      .glass-panel,
+      .main-surface,
+      .interactive-card:not(.product-card) {
+        background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,244,251,0.5)) !important; /* Further reduced opacity from 0.75 to 0.55 */
+        border: 1px solid rgba(142, 68, 173, 0.08);
+        box-shadow: 0 18px 44px rgba(142, 68, 173, 0.08);
+        color: var(--brand-ink) !important;
+        backdrop-filter: blur(2px);
+      }
+
+      /* Specific section card - More transparent */
+      #main-content section.section-shell > .glass-panel > .grid.items-center.gap-10 > div:last-child {
+        background: linear-gradient(135deg, rgba(255,241,248,0.6), rgba(244,234,255,0.55)) !important;
+        border: 1px solid rgba(142, 68, 173, 0.08);
+        color: #222222 !important;
+        backdrop-filter: blur(2px);
+      }
+
+      #main-content section.section-shell > .glass-panel > .grid.items-center.gap-10 > div:last-child > a {
+        background: rgba(255, 255, 255, 0.85) !important;
+        border: 1px solid rgba(142, 68, 173, 0.08);
+        border-radius: 1.75rem;
+        box-shadow: 0 14px 28px rgba(142, 68, 173, 0.08);
+        color: #222222 !important;
+      }
+
+      #main-content section.section-shell > .glass-panel > .grid.items-center.gap-10 > div:last-child > a :is(h1,h2,h3,h4,h5,h6,p,span) {
+        color: #222222 !important;
+      }
+
+      /* ===========================
+        Product Cards - Very transparent
+        =========================== */
+      .product-card {
+        background: rgba(255, 255, 255, 0.75) !important; /* Reduced from 0.92 to 0.75 */
+        border: 1px solid rgba(142,68,173,0.12);
+        border-radius: 1.25rem;
+        box-shadow: 0 20px 40px rgba(91,36,128,0.12), 0 8px 20px rgba(17,24,39,0.07) !important;
+        color: var(--brand-ink) !important;
+        backdrop-filter: blur(4px);
+        transition: all 0.3s ease;
+      }
+
+      .product-card:hover {
+        background: rgba(255, 255, 255, 0.88) !important;
+        box-shadow: 0 24px 46px rgba(91,36,128,0.16), 0 12px 24px rgba(17,24,39,0.1) !important;
+      }
+
+      /* ===========================
+        Buttons
+        =========================== */
+      .btn-primary,
+      #cart-modal .mt-4.w-full,
+      #checkout-modal button[type="submit"] {
+        background: linear-gradient(135deg, var(--brand-purple), var(--brand-pink)) !important;
+        color: #ffffff !important;
+        border: none !important;
+        box-shadow: 0 14px 30px rgba(142, 68, 173, 0.18);
+      }
+      .btn-primary:hover,
+      #cart-modal .mt-4.w-full:hover,
+      #checkout-modal button[type="submit"]:hover { filter: brightness(1.04); }
+
+      .btn-secondary,
+      #checkout-modal button[type="button"] {
+        background: rgba(255, 255, 255, 0.85) !important;
+        color: var(--brand-purple) !important;
+        border: 1px solid rgba(142, 68, 173, 0.18) !important;
+        box-shadow: 0 10px 22px rgba(142, 68, 173, 0.08);
+      }
+      .btn-secondary:hover,
+      #checkout-modal button[type="button"]:hover { background: rgba(243, 235, 255, 0.85) !important; }
+
+      /* ===========================
+        Footer
+        =========================== */
+      footer {
+        background: linear-gradient(180deg, rgba(36,19,57,0.92), rgba(28,16,47,0.88) 56%, rgba(22,10,36,0.85)) !important;
+        backdrop-filter: blur(8px);
+        color: #f5f5f5 !important;
+      }
+
+      footer .bg-white,
+      footer .bg-white\/10 {
+        background: rgba(255,255,255,0.12) !important;
+        box-shadow: 0 16px 30px rgba(0,0,0,0.32) !important;
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      footer h3 { color: #ffd2ea !important; }
+      footer h3, footer p, footer a, footer strong, footer span, footer small { color: #f5f5f5 !important; }
+
+      /* ===========================
+        Products Hero & Toolbar - More transparent
+        =========================== */
+      .products-hero {
+        background: linear-gradient(135deg, rgba(110,47,149,0.75), rgba(142,68,173,0.7), rgba(183,96,214,0.65)) !important;
+        border: 1px solid rgba(255,255,255,0.16);
+        box-shadow: 0 24px 48px rgba(91,36,128,0.24);
+        backdrop-filter: blur(2px);
+      }
+      .products-hero h2, .products-hero .hero-copy { color: #ffffff !important; }
+      .products-hero .hero-kicker { color: #f7d9ff !important; }
+      .products-hero .hero-badge {
+        background: rgba(255,255,255,0.2) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255,255,255,0.16);
+        box-shadow: none !important;
+      }
+
+      .products-toolbar {
+        background: linear-gradient(135deg, rgba(98,45,150,0.8), rgba(132,66,191,0.75), rgba(171,90,214,0.7)) !important;
+        border-top: 1px solid rgba(255,255,255,0.14);
+        border-bottom: 1px solid rgba(255,255,255,0.14);
+        box-shadow: 0 18px 36px rgba(79,29,125,0.22) !important;
+        backdrop-filter: blur(4px);
+      }
+      .products-toolbar #category-filters button { box-shadow: 0 10px 24px rgba(58,20,95,0.18); }
+      .products-toolbar #product-search,
+      .products-toolbar #product-sort,
+      .products-toolbar #product-results-count,
+      .products-toolbar .toolbar-chip,
+      .products-toolbar #clear-search {
+        background: rgba(255,255,255,0.88) !important;
+        color: var(--brand-ink) !important;
+        border-color: rgba(255,255,255,0.26) !important;
+      }
+      .products-toolbar .toolbar-hint { color: #eed8ff !important; }
+
+      /* ===========================
+        Utility Shadow
+        =========================== */
+      .shadow-soft {
+        box-shadow: 0 16px 36px rgba(142,68,173,0.12), 0 5px 14px rgba(255,111,180,0.08) !important;
+      }
+
+      .section-shell {
+        margin-left: auto;
+        margin-right: auto;
+        width: min(100%, 72rem);
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      .info-box {
+        margin-bottom: 1.25rem;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 1rem;
+        backdrop-filter: blur(4px);
+      }
+
+      .field-error {
+        border-color: rgba(225, 29, 72, 0.6) !important;
+        box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.12);
+      }
+
+      .status-chip {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.85rem 1rem;
+        font-weight: 500;
+      }
+
+      /* ===========================
+        Text & Background Helpers
+        =========================== */
+      #main-content .text-rose-500,
+      #main-content .text-rose-600,
+      #main-content .text-rose-700,
+      #main-content .text-pink-500,
+      #main-content .text-pink-600 { color: var(--brand-pink) !important; }
+
+      #main-content .text-violet-700,
+      #main-content .text-violet-600 { color: var(--brand-purple) !important; }
+
+      #main-content .bg-violet-100 { background: rgba(243, 235, 255, 0.85) !important; }
+
+      #main-content .bg-rose-50,
+      #main-content .bg-rose-100,
+      #main-content .bg-pink-50 { background: rgba(255, 240, 247, 0.85) !important; }
+
+      /* ===========================
+        Modals
+        =========================== */
+      #cart-modal > div,
+      #product-details-modal > div,
+      #checkout-modal > div {
+        background: rgba(255, 255, 255, 0.88) !important;
+        backdrop-filter: blur(8px);
+      }
+
+      /* ===========================
+        Dashboard specific - Fix first card alignment
+        =========================== */
+      #main-content .section-shell:first-child .glass-panel .grid {
+        align-items: flex-start !important;
+      }
+      
+      #main-content .section-shell:first-child .glass-panel .grid > div:first-child {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+      }
+
+      /* added */
+            /* Enhanced Footer Styles */
+      footer {
+        background: linear-gradient(180deg, rgba(36,19,57,0.95), rgba(28,16,47,0.92) 56%, rgba(22,10,36,0.9)) !important;
+        backdrop-filter: blur(8px);
+        border-top: 1px solid rgba(255,255,255,0.1);
+      }
+
+      footer a {
+        transition: all 0.3s ease;
+      }
+
+      footer .social-icons a {
+        display: inline-block;
+        transition: transform 0.3s ease;
+      }
+
+      footer .social-icons a:hover {
+        transform: translateY(-3px);
+      }
+
+      footer .rounded-xl {
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(4px);
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        footer .grid {
+          gap: 2rem;
+        }
+        
+        footer .text-sm {
+          font-size: 0.8rem;
+        }
+      }
+
+      /* List styling */
+      footer ul {
+        list-style: none;
+        padding-left: 0;
+      }
+
+      footer ul li {
+        margin-bottom: 0.25rem;
+      }
+
+      /* Link hover effects */
+      footer a:not(.social-icons a) {
+        text-decoration: none;
+        position: relative;
+      }
+
+      footer a:not(.social-icons a):hover {
+        color: #ffd2ea;
+      }
+
+      /* M-Pesa section styling */
+      footer .mpesa-instructions {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+      }
+      /* Alternative: If you have colored icons, remove the filter */
+      footer .flex.gap-3 img {
+        opacity: 0.8;
+        transition: all 0.3s ease;
+      }
+
+      footer .flex.gap-3 img:hover {
+        opacity: 1;
+        transform: translateY(-2px);
+      }
+    </style>
+  </head>
+
+  <body class="flex min-h-screen flex-col text-gray-700">
+    
+    <!-- ============================================ -->
+    <!-- 1. NAVIGATION BAR - Fixed at top of page      -->
+    <!-- ============================================ -->
+    <nav class="fixed top-0 z-50 w-full bg-white shadow-[0_16px_40px_rgba(15,23,42,0.12)]">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <!-- Logo and Brand Name -->
+        <div class="flex items-center gap-4">
+          <a href="#" onclick="loadPage('pages/dashboard.html')" class="flex items-center">
+            <img src="imag/favicon.png" alt="Blessing Enterprise" class="h-14 w-14 object-contain" />
+          </a>
+          <a href="#" onclick="loadPage('pages/dashboard.html')" class="text-2xl font-bold transition hover:text-pink-500" style="color: #ff6fb4 !important;">
+            BLESSING ENTERPRISE
+          </a>
+        </div>
+        
+        <!-- Navigation Links - Desktop -->
+        <div class="hidden items-center space-x-6 md:flex">
+          <ul class="flex space-x-6">
+            <li><a href="#" onclick="loadPage('pages/dashboard.html')" class="transition hover:text-pink-400">Home</a></li>
+            <li><a href="#" onclick="loadPage('pages/products.html')" class="transition hover:text-pink-400">Shop</a></li>
+            <li><a href="#" onclick="openCategory('Offers')" class="transition hover:text-pink-400">Offers</a></li>
+            <li><a href="#" onclick="loadPage('pages/contact.html')" class="transition hover:text-pink-400">Contact</a></li>
+            <li><a href="#" onclick="loadPage('pages/about.html')" class="transition hover:text-pink-400">About Us</a></li>
+          </ul>
+          <!-- Cart Button -->
+          <button onclick="openCart()" class="rounded-lg bg-primary px-4 py-2 shadow transition hover:scale-105">
+            Cart (<span id="cart-count">0</span>)
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ============================================ -->
+    <!-- 2. MAIN CONTENT AREA - Dynamic page loading  -->
+    <!-- ============================================ -->
+    <main id="main-content" class="flex-1 pt-24"></main>
+
+    <!-- ============================================ -->
+    <!-- 3. CART MODAL - Shopping cart popup          -->
+    <!-- ============================================ -->
+    <div id="cart-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 px-4 z-50">
+      <div id="cart-drawer" class="overlay-panel max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl p-6 shadow-xl">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-xl font-bold">Your Cart</h2>
+          <button onclick="closeCart()" class="text-xl text-gray-500 hover:text-gray-700">&times;</button>
+        </div>
+        <div id="cart-items"></div>
+        <div class="mt-4 border-t pt-4">
+          <h3 class="text-lg font-semibold">Total: $<span id="cart-total">0</span></h3>
+          <button onclick="checkout()" class="mt-4 w-full rounded-lg bg-pink-400 py-3 text-white transition hover:scale-105">
+            Place Order via WhatsApp
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 4. PRODUCT DETAILS MODAL - View product info -->
+    <!-- ============================================ -->
+    <div id="product-details-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 px-4 py-8 z-50">
+      <div class="overlay-panel max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-[2rem] p-6 shadow-xl">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-xl font-bold text-gray-800">Product Details</h2>
+          <button onclick="closeProductDetails()" class="text-xl text-gray-500 hover:text-gray-700">&times;</button>
+        </div>
+        <div id="product-details-body"></div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 5. CHECKOUT MODAL - Order form               -->
+    <!-- ============================================ -->
+    <div id="checkout-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 px-4 py-8 z-50">
+      <div class="overlay-panel max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] p-6 shadow-xl">
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-gray-800">Complete Your Order</h2>
+            <p class="mt-1 text-sm text-gray-500">Fill in your delivery details and continue to WhatsApp.</p>
+          </div>
+          <button onclick="closeCheckoutModal()" class="text-xl text-gray-500 hover:text-gray-700">&times;</button>
+        </div>
+
+        <div class="mb-4 rounded-2xl bg-pink-50 px-4 py-3 text-sm text-gray-700">
+          Order total: <span class="font-semibold">$<span id="checkout-total">0.00</span></span>
+        </div>
+
+        <div id="checkout-status" class="hidden mb-4 rounded-2xl px-4 py-3 text-sm"></div>
+
+        <form id="checkout-form" class="space-y-4">
+          <div>
+            <label for="customer-name" class="mb-2 block text-sm font-medium text-gray-700">Full name</label>
+            <input id="customer-name" name="name" type="text" class="w-full rounded-xl border border-pink-100 px-4 py-3 outline-none focus:border-pink-300" />
+            <p id="name-error" class="hidden mt-2 text-sm text-rose-600"></p>
+          </div>
+
+          <div>
+            <label for="customer-phone" class="mb-2 block text-sm font-medium text-gray-700">Phone number</label>
+            <input id="customer-phone" name="phone" type="tel" class="w-full rounded-xl border border-pink-100 px-4 py-3 outline-none focus:border-pink-300" />
+            <p id="phone-error" class="hidden mt-2 text-sm text-rose-600"></p>
+          </div>
+
+          <div>
+            <label for="customer-address" class="mb-2 block text-sm font-medium text-gray-700">Delivery address</label>
+            <textarea id="customer-address" name="address" rows="4" class="w-full rounded-xl border border-pink-100 px-4 py-3 outline-none focus:border-pink-300"></textarea>
+            <p id="address-error" class="hidden mt-2 text-sm text-rose-600"></p>
+          </div>
+
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <button type="submit" class="flex-1 rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-pink-600">
+              Continue to WhatsApp
+            </button>
+            <button type="button" onclick="closeCheckoutModal()" class="flex-1 rounded-xl border border-pink-100 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-pink-50">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="beauty-quiz-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 px-4 py-8 z-50">
+      <div class="overlay-panel max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] p-6 shadow-xl">
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold text-gray-800">Find Your Perfect Match</h2>
+            <p class="mt-1 text-sm text-gray-500">Answer three quick questions and we will recommend a product.</p>
+          </div>
+          <button type="button" onclick="closeBeautyQuiz()" class="text-xl text-gray-500 hover:text-gray-700">&times;</button>
+        </div>
+
+        <form id="beauty-quiz-form" class="space-y-4">
+          <div>
+            <label for="beauty-goal" class="mb-2 block text-sm font-medium text-gray-700">What do you want most right now?</label>
+            <select id="beauty-goal" name="goal" class="w-full rounded-xl border border-pink-100 px-4 py-3 outline-none focus:border-pink-300">
+              <option value="glow">Healthy glow</option>
+              <option value="hydrate">Deep hydration</option>
+              <option value="repair">Overnight repair</option>
+              <option value="bold">Bold color</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="beauty-routine" class="mb-2 block text-sm font-medium text-gray-700">When will you use it most?</label>
+            <select id="beauty-routine" name="routine" class="w-full rounded-xl border border-pink-100 px-4 py-3 outline-none focus:border-pink-300">
+              <option value="daily">Daily routine</option>
+              <option value="morning">Morning routine</option>
+              <option value="evening">Evening routine</option>
+              <option value="travel">Quick touch-ups</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="beauty-category" class="mb-2 block text-sm font-medium text-gray-700">Which collection interests you most?</label>
+            <select id="beauty-category" name="category" class="w-full rounded-xl border border-pink-100 px-4 py-3 outline-none focus:border-pink-300">
+              <option value="facial">Facials</option>
+              <option value="lips">Lips</option>
+              <option value="body">Bodycare</option>
+              <option value="hair">Haircare</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-3 sm:flex-row">
+            <button type="submit" class="flex-1 rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-pink-600">
+              Show My Match
+            </button>
+            <button type="button" onclick="closeBeautyQuiz()" class="flex-1 rounded-xl border border-pink-100 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-pink-50">
+              Cancel
+            </button>
+          </div>
+        </form>
+
+        <div id="beauty-quiz-results" class="mt-5 hidden"></div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 7. NEWSLETTER POPUP (Exit Intent)            -->
+    <!-- ============================================ -->
+    <div id="newsletter-popup" class="fixed inset-0 hidden items-center justify-center bg-black/50 z-50">
+      <div class="bg-white rounded-2xl max-w-md p-8 relative mx-4">
+        <button onclick="closeNewsletterPopup()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">&times;</button>
+        <div class="text-center">
+          <div class="text-5xl mb-4">💝</div>
+          <h3 class="text-2xl font-bold">Get 10% Off Your First Order!</h3>
+          <p class="text-gray-600 mt-2 text-sm">Subscribe to get exclusive offers and beauty tips</p>
+          <form id="popup-newsletter" class="mt-6">
+            <input type="email" placeholder="Your email address" class="w-full rounded-xl border p-3 mb-3" required>
+            <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white py-3 rounded-xl font-semibold">
+              Subscribe & Save
+            </button>
+          </form>
+          <p class="text-xs text-gray-400 mt-3">No spam, unsubscribe anytime</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 8. LIMITED STOCK ALERT BANNER (Floating)     -->
+    <!-- ============================================ -->
+    <div class="fixed bottom-20 right-4 z-40 hidden animate-bounce" id="stock-alert">
+      <div class="bg-red-500 text-white rounded-lg p-3 shadow-lg max-w-[250px]">
+        <p class="text-xs font-semibold">🔥 Limited Stock!</p>
+        <p class="text-xs">Matte Lipstick - Only 5 left</p>
+        <button type="button" onclick="quickView(2)" class="text-xs underline mt-1">Shop Now →</button>
+      </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 9. RECENTLY VIEWED PRODUCTS (Dynamic)        -->
+    <!-- ============================================ -->
+    <section class="section-shell mt-8 mb-8" id="recently-viewed" style="display: none;">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl md:text-3xl text-[var(--ink)]">🔄 Recently Viewed</h2>
+        <a href="#" onclick="clearRecentlyViewed()" class="text-xs text-gray-500 hover:text-pink-500">Clear</a>
+      </div>
+      <div id="recently-viewed-products" class="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <!-- Populated by JavaScript -->
+      </div>
+    </section>
+
+    <footer class="mt-auto bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 py-12 text-slate-100">
+      <div class="mx-auto max-w-6xl px-6">
+        <div class="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+          
+          <!-- Column 1: Contact Methods & Social Media -->
+          <div>
+            <h3 class="mb-4 text-xl font-serif text-pink-200">Contact Us</h3>
+            
+            <div class="info-box">
+              <p class="text-sm font-semibold text-pink-200 mb-2">📞 Phone Numbers</p>
+              <p class="text-sm text-slate-100">Sales: <a href="tel:+254711490385" class="contact-link text-slate-100 hover:text-pink-200">+254 711 490 385</a></p>
+              <p class="text-sm text-slate-100">Customer Care: <a href="tel:+254111554776" class="contact-link text-slate-100 hover:text-pink-200">+254 111 554 776</a></p>
+              <p class="text-sm text-slate-100">WhatsApp Business: <a href="https://wa.me/254711490385" class="contact-link text-slate-100 hover:text-pink-200">Chat Now →</a></p>
+            </div>
+            
+            <div class="info-box">
+              <p class="text-sm font-semibold text-pink-200 mb-2">✉️ Email Addresses</p>
+              <p class="text-sm text-slate-100">General: <a href="mailto:info@blessingenterprise.com" class="contact-link text-slate-100 hover:text-pink-200">info@blessingenterprise.com</a></p>
+              <p class="text-sm text-slate-100">Orders: <a href="mailto:orders@blessingenterprise.com" class="contact-link text-slate-100 hover:text-pink-200">orders@blessingenterprise.com</a></p>
+              <p class="text-sm text-slate-100">Support: <a href="mailto:support@blessingenterprise.com" class="contact-link text-slate-100 hover:text-pink-200">support@blessingenterprise.com</a></p>
+            </div>
+            
+            <!-- Social Media Links -->
+            <div class="info-box">
+              <h4 class="text-sm font-semibold text-pink-200 mb-3">Follow Us</h4>
+              <div class="flex gap-3">
+                <a href="https://instagram.com/blessing_enterprise" target="_blank" class="social-icon">
+                  <img src="imag/icons/instagram.png" alt="Instagram" class="h-8 w-8">
+                </a>
+                <a href="https://facebook.com/blessingenterprise" target="_blank" class="social-icon">
+                  <img src="imag/icons/facebook.png" alt="Facebook" class="h-8 w-8">
+                </a>
+                <a href="https://tiktok.com/@blessing_beauty" target="_blank" class="social-icon">
+                  <img src="imag/icons/tiktok.png" alt="TikTok" class="h-8 w-8">
+                </a>
+                <a href="https://twitter.com/BlessingBeauty" target="_blank" class="social-icon">
+                  <img src="imag/icons/twitter.png" alt="Twitter" class="h-8 w-8">
+                </a>
+                <a href="https://wa.me/254711490385" target="_blank" class="social-icon">
+                  <img src="imag/icons/whatsapp.png" alt="WhatsApp" class="h-8 w-8">
+                </a>
+              </div>
+            </div>
+          </div>
+    
+          <!-- Column 2: Business Hours & Delivery Information -->
+          <div>
+            <h3 class="mb-4 text-xl font-serif text-pink-200">Info</h3>
+            
+            <div class="info-box">
+              <p class="text-sm font-semibold text-pink-200 mb-2">🕐 Business Hours</p>
+              <ul class="text-sm text-slate-100 space-y-1">
+                <li><strong>Monday - Friday:</strong> 9:00 AM - 8:00 PM</li>
+                <li><strong>Saturday:</strong> 10:00 AM - 6:00 PM</li>
+                <li><strong>Sunday:</strong> 12:00 PM - 5:00 PM</li>
+                <li><strong>Public Holidays:</strong> 10:00 AM - 4:00 PM</li>
+              </ul>
+              <p class="text-xs text-pink-200 mt-2">✨ 24/7 Online ordering via WhatsApp</p>
+            </div>
+            
+            <div class="info-box">
+              <p class="text-sm font-semibold text-pink-200 mb-2">🚚 Delivery Information</p>
+              <ul class="text-sm text-slate-100 space-y-1">
+                <li>✅ <strong>Nakuru CBD</strong> - Free delivery (orders > KES 2000)</li>
+                <li>✅ <strong>Gilgil</strong> - Delivery fee: KES 150</li>
+                <li>✅ <strong>Langa Langa</strong> - Free Delivery</li>
+                <li>✅ <strong>Nairobi</strong> - Delivery fee: KES 500</li>
+                <li>✅ <strong>Nationwide</strong> - Delivery available</li>
+              </ul>
+              <p class="text-xs text-pink-200 mt-2">⏱ Same-day delivery for orders before 2PM (Nakuru)</p>
+            </div>
+          </div>
+    
+          <!-- Column 3: Payments, Policies & Quick Links -->
+          <div>
+            <h3 class="mb-4 text-xl font-serif text-pink-200">Payments & Policies</h3>
+            
+            <div class="info-box">
+              <p class="text-sm font-semibold text-pink-200 mb-2">💳 Payment Methods</p>
+              <ul class="text-sm text-slate-100 space-y-1">
+                <li>💵 Cash on Delivery</li>
+                <li>📱 M-Pesa (Paybill: 123456)</li>
+                <li>💳 Visa/Mastercard via WhatsApp</li>
+                <li>🏦 Bank Transfer (Contact for details)</li>
+              </ul>
+            </div>
+            
+            <div class="info-box">
+              <p class="text-sm font-semibold text-pink-200 mb-2">🔄 Return & Exchange Policy</p>
+              <ul class="text-sm text-slate-100 space-y-1">
+                <li>✅ 7-day return for unopened products</li>
+                <li>✅ Exchange within 14 days with receipt</li>
+                <li>✅ Free exchange for damaged items</li>
+                <li>📞 Contact us within 24hrs of delivery</li>
+              </ul>
+            </div>
+            
+            <div class="info-box">
+              <p class="text-sm font-semibold text-pink-200 mb-2">🔗 Quick Links</p>
+              <ul class="text-sm text-slate-100 space-y-1">
+                <li><a href="#" onclick="loadPage('pages/dashboard.html')" class="contact-link text-slate-100 hover:text-pink-200">🏠 Home</a></li>
+                <li><a href="#" onclick="loadPage('pages/products.html')" class="contact-link text-slate-100 hover:text-pink-200">🛍️ Shop</a></li>
+                <li><a href="#" onclick="loadPage('pages/about.html')" class="contact-link text-slate-100 hover:text-pink-200">📖 About Us</a></li>
+                <li><a href="#" onclick="loadPage('pages/contact.html')" class="contact-link text-slate-100 hover:text-pink-200">📞 Contact</a></li>
+                <li><a href="#" onclick="openCategory('Offers')" class="contact-link text-slate-100 hover:text-pink-200">🎉 Special Offers</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+    
+        <!-- M-Pesa Instructions Section (Commented out) -->
+        <!-- 
+        <div class="mb-8 rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h4 class="text-sm font-semibold text-pink-200 mb-2">📱 M-Pesa Paybill Instructions</h4>
+              <ol class="text-xs text-slate-200 space-y-1 list-decimal list-inside">
+                <li>Go to M-Pesa menu → Lipa na M-Pesa → Paybill</li>
+                <li>Enter Business No: <strong class="text-pink-200">123456</strong></li>
+                <li>Enter Account: <strong class="text-pink-200">Your Phone Number</strong></li>
+                <li>Enter Amount and PIN</li>
+                <li>Send confirmation to our WhatsApp</li>
+              </ol>
+            </div>
+            <div class="text-center md:text-right">
+              <p class="text-xs text-slate-300">Questions? <a href="https://wa.me/254711490385" class="text-pink-200 hover:text-pink-300 font-semibold">Chat with us →</a></p>
+            </div>
+          </div>
+        </div>
+        -->
+    
+        <!-- Bottom Bar -->
+        <div class="border-t border-white/10 pt-6 text-center">
+          <p class="text-sm text-slate-300">&copy; 2026 BLESSING ENTERPRISE. All rights reserved.</p>
+          <div class="mt-3 flex flex-wrap justify-center gap-4 text-xs text-slate-400">
+            <a href="#" class="contact-link text-slate-400 hover:text-pink-200">Privacy Policy</a>
+            <span class="text-slate-600">|</span>
+            <a href="#" class="contact-link text-slate-400 hover:text-pink-200">Terms & Conditions</a>
+            <span class="text-slate-600">|</span>
+            <a href="#" class="contact-link text-slate-400 hover:text-pink-200">Returns Policy</a>
+            <span class="text-slate-600">|</span>
+            <a href="#" class="contact-link text-slate-400 hover:text-pink-200">Shipping Info</a>
+          </div>
+          
+          <!-- Trust Badges -->
+          <div class="mt-4 flex flex-wrap justify-center gap-6 text-xs text-slate-400">
+            <span>🔒 100% Secure Payments</span>
+            <span>⭐ 4.9/5 Customer Rating</span>
+            <span>🚚 Fast & Reliable Delivery</span>
+            <span>💯 Authentic Products</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <a
+      href="https://wa.me/254711490385"
+      target="_blank"
+      rel="noreferrer"
+      class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-green-500 shadow-xl transition-all duration-300 hover:scale-110 hover:bg-green-600"
+    >
+      <img src="imag/whatsapp-icon.png" alt="WhatsApp" class="h-10 w-10 object-contain" />
+    </a>
+
+    <div
+      id="cart-toast"
+      class="pointer-events-none fixed bottom-24 left-1/2 z-[60] w-[min(92vw,24rem)] -translate-x-1/2 translate-y-24 rounded-2xl bg-[rgba(36,19,57,0.94)] px-4 py-3 text-sm font-medium text-white opacity-0 shadow-2xl transition duration-300"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <p id="cart-toast-text">Added to cart</p>
+    </div>
+
+    <script src="products.js"></script>
+    <script src="scripts.js"></script>
+  </body>
+</html>
