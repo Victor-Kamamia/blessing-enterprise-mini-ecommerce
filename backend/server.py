@@ -2,260 +2,104 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-import re
+import queue
 import secrets
 import threading
-from datetime import datetime, timezone
+from datetime import datetime
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
-from pathlib import Path
 from typing import Any
-from urllib.parse import quote, urlparse
+from urllib.parse import parse_qs, urlparse
+
+if __package__ in {None, ""}:
+    import sys
+    from pathlib import Path
+
+    sys.path.append(str(Path(__file__).resolve().parent.parent))
+
+    from backend.admin_routes import AdminDashboardApi
+    from backend.common import normalize_phone, normalize_string_list, normalize_text, parse_price_value, read_json, validate_email, validate_phone, write_json
+    from backend.config import Settings, load_settings
+    from backend.database import Database
+    from backend.email_service import EmailService
+    from backend.events import EventBroker
+    from backend.mpesa import MpesaService
+    from backend.order_service import OrderService
+else:
+    from .admin_routes import AdminDashboardApi
+    from .common import normalize_phone, normalize_string_list, normalize_text, parse_price_value, read_json, validate_email, validate_phone, write_json
+    from .config import Settings, load_settings
+    from .database import Database
+    from .email_service import EmailService
+    from .events import EventBroker
+    from .mpesa import MpesaService
+    from .order_service import OrderService
 
 
-ROOT_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT_DIR / "data"
-HOST = "127.0.0.1"
-PORT = 8000
-WHATSAPP_NUMBER = "254711490385"
-PHONE_PATTERN = re.compile(r"^[+]?\d{10,15}$")
-EMAIL_PATTERN = re.compile(r"^[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}$", re.IGNORECASE)
 DATA_LOCK = threading.Lock()
 SESSION_LOCK = threading.Lock()
-
-PRODUCTS_FILE = DATA_DIR / "products.json"
-ORDERS_FILE = DATA_DIR / "orders.json"
-NEWSLETTER_FILE = DATA_DIR / "newsletter.json"
-LOYALTY_FILE = DATA_DIR / "loyalty.json"
 ADMIN_SESSIONS: dict[str, dict[str, str]] = {}
 
 
-def ensure_data_files() -> None:
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+def ensure_data_files(settings: Settings) -> None:
+    settings.data_dir.mkdir(parents=True, exist_ok=True)
     defaults = {
-        PRODUCTS_FILE: [],
-        ORDERS_FILE: [],
-        NEWSLETTER_FILE: [],
-        LOYALTY_FILE: [],
+        settings.products_file: [],
+        settings.orders_file: [],
+        settings.newsletter_file: [],
+        settings.loyalty_file: [],
     }
     for path, fallback in defaults.items():
         if path.exists():
             continue
-        path.write_text(json.dumps(fallback, indent=2), encoding="utf-8")
-
-
-def read_json(path: Path, fallback: Any) -> Any:
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (FileNotFoundError, json.JSONDecodeError):
-        return fallback
-
-
-def write_json(path: Path, payload: Any) -> None:
-    path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-
-
-def utc_now_iso() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+        write_json(path, fallback)
 
 
 def build_response(payload: Any, status: HTTPStatus = HTTPStatus.OK) -> tuple[int, bytes]:
-    return status, json.dumps(payload).encode("utf-8")
+    return status.value, json.dumps(payload).encode("utf-8")
 
 
-def get_products() -> list[dict[str, Any]]:
-    products = read_json(PRODUCTS_FILE, [])
+def get_products(settings: Settings) -> list[dict[str, Any]]:
+    products = read_json(settings.products_file, [])
     return products if isinstance(products, list) else []
 
 
-def get_orders() -> list[dict[str, Any]]:
-    orders = read_json(ORDERS_FILE, [])
-    return orders if isinstance(orders, list) else []
-
-
-def get_newsletter_subscribers() -> list[dict[str, Any]]:
-    subscribers = read_json(NEWSLETTER_FILE, [])
+def get_newsletter_subscribers(settings: Settings) -> list[dict[str, Any]]:
+    subscribers = read_json(settings.newsletter_file, [])
     return subscribers if isinstance(subscribers, list) else []
 
 
-def get_loyalty_members() -> list[dict[str, Any]]:
-    members = read_json(LOYALTY_FILE, [])
+def get_loyalty_members(settings: Settings) -> list[dict[str, Any]]:
+    members = read_json(settings.loyalty_file, [])
     return members if isinstance(members, list) else []
 
 
-def normalize_phone(phone: str) -> str:
-    return re.sub(r"\s+", "", phone.strip())
-
-
-def normalize_text(value: Any) -> str:
-    return " ".join(str(value or "").strip().split())
-
-
-def normalize_string_list(value: Any) -> list[str]:
-    if value is None:
-        return []
-    if isinstance(value, str):
-        candidates = re.split(r"[\r\n,]+", value)
-    elif isinstance(value, list):
-        candidates = value
-    else:
-        raise ValueError("List fields must be sent as an array or comma-separated text.")
-    return [normalize_text(item) for item in candidates if normalize_text(item)]
-
-
-def parse_price_value(value: Any, field_name: str) -> float:
-    try:
-        amount = round(float(value), 2)
-    except (TypeError, ValueError) as error:
-        raise ValueError(f"{field_name} must be a valid number.") from error
-    if amount <= 0:
-        raise ValueError(f"{field_name} must be greater than 0.")
-    return amount
-
-
-def build_next_product_id(existing_products: list[dict[str, Any]]) -> int:
-    numeric_ids = [int(product["id"]) for product in existing_products if isinstance(product.get("id"), int)]
-    return max(numeric_ids, default=0) + 1
-
-
-def get_admin_username() -> str:
-    return os.environ.get("BLESSING_ADMIN_USERNAME", "admin")
-
-
-def get_admin_password() -> str:
-    return os.environ.get("BLESSING_ADMIN_PASSWORD", "BlessingAdmin2026!")
-
-
-def validate_email(email: str) -> str | None:
-    normalized = email.strip().lower()
-    if not normalized:
-        return "Email is required."
-    if not EMAIL_PATTERN.fullmatch(normalized):
-        return "Use a valid email address."
-    return None
-
-
-def validate_phone(phone: str) -> str | None:
-    normalized = normalize_phone(phone)
-    if not normalized:
-        return "Phone number is required."
-    if not PHONE_PATTERN.fullmatch(normalized):
-        return "Use a valid phone number with 10 to 15 digits."
-    return None
-
-
-def build_order_reference(existing_orders: list[dict[str, Any]]) -> str:
-    today = datetime.now().strftime("%Y%m%d")
-    daily_count = sum(1 for order in existing_orders if str(order.get("reference", "")).startswith(f"ORD-{today}-"))
-    return f"ORD-{today}-{daily_count + 1:04d}"
-
-
-def calculate_order(items_payload: Any, products: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], float]:
-    if not isinstance(items_payload, list) or not items_payload:
-        raise ValueError("Order items are required.")
-
-    catalog = {int(product["id"]): product for product in products if "id" in product}
-    line_items: list[dict[str, Any]] = []
-    total = 0.0
-
-    for raw_item in items_payload:
-        if not isinstance(raw_item, dict):
-            raise ValueError("Each order item must be an object.")
-        product_id = raw_item.get("id")
-        quantity = raw_item.get("quantity")
-        if not isinstance(product_id, int):
-            raise ValueError("Each order item needs a numeric product id.")
-        if not isinstance(quantity, int) or quantity < 1:
-            raise ValueError("Each order item needs a quantity of at least 1.")
-        product = catalog.get(product_id)
-        if not product:
-            raise ValueError(f"Product {product_id} was not found.")
-        unit_price = float(product.get("price", 0))
-        line_total = round(unit_price * quantity, 2)
-        total = round(total + line_total, 2)
-        line_items.append(
-            {
-                "id": product_id,
-                "name": product.get("name", "Unknown Product"),
-                "category": product.get("category", ""),
-                "image": product.get("image", ""),
-                "quantity": quantity,
-                "unitPrice": round(unit_price, 2),
-                "lineTotal": line_total,
-            }
-        )
-
-    return line_items, total
-
-
-def build_whatsapp_message(order: dict[str, Any]) -> str:
-    customer = order["customer"]
-    lines = [
-        "Hello BLESSING ENTERPRISE,",
-        "",
-        f"Order Ref: {order['reference']}",
-        f"My name is: {customer['name']}",
-        f"Phone: {customer['phone']}",
-        "",
-        "I would like to place an order:",
-        "",
-    ]
-    lines.extend(
-        f"{index}. {item['name']} (x{item['quantity']}) - ${item['lineTotal']:.2f}"
-        for index, item in enumerate(order["items"], start=1)
-    )
-    lines.extend(
-        [
-            "",
-            f"Total: ${order['totalAmount']:.2f}",
-            "",
-            "Delivery Address:",
-            customer["address"],
-            "",
-            "Thank you!",
-        ]
-    )
-    return "\n".join(lines)
-
-
-def make_whatsapp_url(message: str) -> str:
-    return f"https://wa.me/{WHATSAPP_NUMBER}?text={quote(message)}"
-
-
-def build_catalog_payload() -> dict[str, Any]:
-    products = get_products()
+def build_catalog_payload(settings: Settings) -> dict[str, Any]:
+    products = get_products(settings)
     categories = ["All", *sorted({str(product.get("category", "")) for product in products if product.get("category")})]
     return {"items": products, "count": len(products), "categories": categories}
 
 
-def build_newsletter_payload() -> dict[str, Any]:
-    subscribers = list(reversed(get_newsletter_subscribers()))
+def build_newsletter_payload(settings: Settings) -> dict[str, Any]:
+    subscribers = list(reversed(get_newsletter_subscribers(settings)))
     return {"items": subscribers, "count": len(subscribers)}
 
 
-def build_dashboard_payload() -> dict[str, Any]:
-    orders = get_orders()
-    newsletter = get_newsletter_subscribers()
-    loyalty = get_loyalty_members()
-    revenue = round(sum(float(order.get("totalAmount", 0)) for order in orders), 2)
-    recent_orders = list(reversed(orders[-5:]))
-    return {
-        "totals": {
-            "orders": len(orders),
-            "newsletterSubscribers": len(newsletter),
-            "loyaltyMembers": len(loyalty),
-            "revenue": revenue,
-        },
-        "recentOrders": recent_orders,
-    }
+def build_next_product_id(existing_products: list[dict[str, Any]]) -> int:
+    numeric_ids = [int(product["id"]) for product in existing_products if isinstance(product, dict) and isinstance(product.get("id"), int)]
+    return max(numeric_ids, default=0) + 1
 
 
 class BlessingRequestHandler(SimpleHTTPRequestHandler):
-    server_version = "BlessingBackend/1.0"
+    server_version = "BlessingBackend/2.0"
+    settings: Settings
+    database: Database
+    event_broker: EventBroker
+    order_service: OrderService
+    admin_api: AdminDashboardApi
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, directory=str(ROOT_DIR), **kwargs)
+        super().__init__(*args, directory=str(self.settings.root_dir), **kwargs)
 
     def log_message(self, format: str, *args: Any) -> None:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -280,14 +124,22 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
         except json.JSONDecodeError as error:
             raise ValueError("Request body must be valid JSON.") from error
 
-    def get_auth_token(self) -> str:
+    def get_auth_token(self, parsed: Any | None = None) -> str:
         auth_header = self.headers.get("Authorization", "")
         if auth_header.lower().startswith("bearer "):
             return auth_header[7:].strip()
-        return self.headers.get("X-Admin-Token", "").strip()
+        token = self.headers.get("X-Admin-Token", "").strip()
+        if token:
+            return token
+        if parsed is not None:
+            query = parse_qs(parsed.query)
+            token_values = query.get("token") or []
+            if token_values:
+                return str(token_values[0]).strip()
+        return ""
 
-    def require_admin_auth(self) -> bool:
-        token = self.get_auth_token()
+    def require_admin_auth(self, parsed: Any | None = None) -> bool:
+        token = self.get_auth_token(parsed)
         if not token:
             self.send_json({"error": "Admin authentication required."}, HTTPStatus.UNAUTHORIZED)
             return False
@@ -300,18 +152,21 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
     def do_OPTIONS(self) -> None:
         self.send_response(HTTPStatus.NO_CONTENT)
         self.send_header("Access-Control-Allow-Origin", "*")
-        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.end_headers()
 
     def end_headers(self) -> None:
         self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
         super().end_headers()
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path.startswith("/api/"):
-            self.handle_api_get(parsed.path)
+            self.handle_api_get(parsed)
             return
         if parsed.path == "/":
             self.path = "/index.html"
@@ -322,59 +177,135 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
         if not parsed.path.startswith("/api/"):
             self.send_error(HTTPStatus.NOT_FOUND, "Not Found")
             return
-        self.handle_api_post(parsed.path)
+        self.handle_api_post(parsed)
 
-    def handle_api_get(self, path: str) -> None:
+    def handle_api_get(self, parsed: Any) -> None:
+        path = parsed.path
         if path == "/api/health":
-            self.send_json({"status": "ok", "timestamp": utc_now_iso()})
+            self.send_json(
+                {
+                    "status": "ok",
+                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "database": str(self.settings.database_file),
+                    "mpesaMockMode": self.settings.mpesa_mock_mode,
+                }
+            )
             return
         if path == "/api/products":
-            self.send_json(build_catalog_payload())
-            return
-        if path == "/api/newsletter":
-            if not self.require_admin_auth():
-                return
-            self.send_json(build_newsletter_payload())
+            self.send_json(build_catalog_payload(self.settings))
             return
         if path.startswith("/api/products/"):
             product_id = path.rsplit("/", 1)[-1]
             if not product_id.isdigit():
                 self.send_json({"error": "Product id must be numeric."}, HTTPStatus.BAD_REQUEST)
                 return
-            product = next((item for item in get_products() if int(item.get("id", -1)) == int(product_id)), None)
+            product = next((item for item in get_products(self.settings) if int(item.get("id", -1)) == int(product_id)), None)
             if not product:
                 self.send_json({"error": "Product not found."}, HTTPStatus.NOT_FOUND)
                 return
             self.send_json({"item": product})
             return
+        if path == "/api/newsletter":
+            if not self.require_admin_auth(parsed):
+                return
+            self.send_json(build_newsletter_payload(self.settings))
+            return
         if path == "/api/orders":
-            self.send_json({"items": list(reversed(get_orders()))})
+            self.send_json({"items": self.database.list_orders()})
+            return
+        if path.startswith("/api/orders/"):
+            reference = path.rsplit("/", 1)[-1].strip()
+            order = self.database.get_order(reference)
+            if order is None:
+                self.send_json({"error": "Order not found."}, HTTPStatus.NOT_FOUND)
+                return
+            self.send_json({"item": order})
             return
         if path == "/api/dashboard":
-            self.send_json(build_dashboard_payload())
+            self.send_json(self.admin_api.build_legacy_dashboard_payload())
+            return
+        if path == "/api/admin/dashboard":
+            if not self.require_admin_auth(parsed):
+                return
+            self.send_json(self.admin_api.build_dashboard_payload())
+            return
+        if path == "/api/admin/orders":
+            if not self.require_admin_auth(parsed):
+                return
+            query = parse_qs(parsed.query)
+            limit_raw = str((query.get("limit") or ["50"])[0])
+            status_values = [
+                str(value).strip().lower()
+                for value in query.get("status", [])
+                if str(value).strip()
+            ]
+            exclude_status_values = [
+                str(value).strip().lower()
+                for value in query.get("excludeStatus", [])
+                if str(value).strip()
+            ]
+            limit = 50
+            if limit_raw.isdigit():
+                limit = max(1, min(200, int(limit_raw)))
+            self.send_json(
+                self.admin_api.build_orders_payload(
+                    limit=limit,
+                    delivery_statuses=status_values or None,
+                    exclude_delivery_statuses=exclude_status_values or None,
+                )
+            )
+            return
+        if path == "/api/admin/debug-db":
+            if not self.require_admin_auth(parsed):
+                return
+            query = parse_qs(parsed.query)
+            limit_raw = str((query.get("limit") or ["8"])[0])
+            limit = 8
+            if limit_raw.isdigit():
+                limit = max(1, min(25, int(limit_raw)))
+            self.send_json(self.database.build_debug_snapshot(preview_limit=limit))
+            return
+        if path == "/api/admin/events":
+            if not self.require_admin_auth(parsed):
+                return
+            self.stream_admin_events()
             return
         self.send_json({"error": "Endpoint not found."}, HTTPStatus.NOT_FOUND)
 
-    def handle_api_post(self, path: str) -> None:
+    def handle_api_post(self, parsed: Any) -> None:
+        path = parsed.path
         try:
             payload = self.parse_json_body()
         except ValueError as error:
             self.send_json({"error": str(error)}, HTTPStatus.BAD_REQUEST)
             return
 
-        if path == "/api/orders":
-            self.create_order(payload)
+        if path in {"/api/orders", "/api/checkout"}:
+            self.create_checkout(payload)
+            return
+        if path == "/api/payments/mpesa/callback":
+            self.handle_mpesa_callback(payload)
             return
         if path == "/api/admin/login":
             self.login_admin(payload)
             return
         if path == "/api/admin/logout":
-            if not self.require_admin_auth():
+            if not self.require_admin_auth(parsed):
                 return
-            self.logout_admin()
+            self.logout_admin(parsed)
+            return
+        if path == "/api/admin/orders/status":
+            if not self.require_admin_auth(parsed):
+                return
+            self.update_admin_order_delivery_status_from_payload(payload)
+            return
+        if path.startswith("/api/admin/orders/") and path.endswith("/delivery-status"):
+            if not self.require_admin_auth(parsed):
+                return
+            self.update_admin_order_delivery_status(path, payload)
             return
         if path == "/api/products":
-            if not self.require_admin_auth():
+            if not self.require_admin_auth(parsed):
                 return
             self.create_product(payload)
             return
@@ -393,28 +324,60 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
 
         username = normalize_text(payload.get("username"))
         password = str(payload.get("password", ""))
-        if username != get_admin_username() or password != get_admin_password():
+        if username != self.settings.admin_username or password != self.settings.admin_password:
             self.send_json({"error": "Invalid admin username or password."}, HTTPStatus.UNAUTHORIZED)
             return
 
         token = secrets.token_urlsafe(32)
-        session = {"username": username, "createdAt": utc_now_iso()}
+        session = {"username": username, "createdAt": datetime.utcnow().isoformat() + "Z"}
         with SESSION_LOCK:
             ADMIN_SESSIONS[token] = session
+        self.send_json({"message": "Signed in successfully.", "token": token, "session": session})
 
-        self.send_json(
-            {
-                "message": "Signed in successfully.",
-                "token": token,
-                "session": session,
-            }
-        )
-
-    def logout_admin(self) -> None:
-        token = self.get_auth_token()
+    def logout_admin(self, parsed: Any) -> None:
+        token = self.get_auth_token(parsed)
         with SESSION_LOCK:
             ADMIN_SESSIONS.pop(token, None)
         self.send_json({"message": "Signed out successfully."})
+
+    def update_admin_order_delivery_status(self, path: str, payload: Any) -> None:
+        if not isinstance(payload, dict):
+            self.send_json({"error": "Delivery status payload must be an object."}, HTTPStatus.BAD_REQUEST)
+            return
+        prefix = "/api/admin/orders/"
+        reference = path[len(prefix):-len("/delivery-status")].strip("/")
+        if not reference:
+            self.send_json({"error": "Order reference is required."}, HTTPStatus.BAD_REQUEST)
+            return
+        delivery_status = normalize_text(payload.get("deliveryStatus")).lower()
+        self._update_order_delivery_status(reference, delivery_status)
+
+    def update_admin_order_delivery_status_from_payload(self, payload: Any) -> None:
+        if not isinstance(payload, dict):
+            self.send_json({"error": "Delivery status payload must be an object."}, HTTPStatus.BAD_REQUEST)
+            return
+        reference = normalize_text(payload.get("reference"))
+        if not reference:
+            self.send_json({"error": "Order reference is required."}, HTTPStatus.BAD_REQUEST)
+            return
+        delivery_status = normalize_text(payload.get("deliveryStatus")).lower()
+        self._update_order_delivery_status(reference, delivery_status)
+
+    def _update_order_delivery_status(self, reference: str, delivery_status: str) -> None:
+        if not delivery_status:
+            self.send_json({"error": "Delivery status is required."}, HTTPStatus.BAD_REQUEST)
+            return
+        try:
+            order = self.database.update_order_delivery_status(reference, delivery_status)
+        except ValueError as error:
+            self.send_json({"error": str(error)}, HTTPStatus.BAD_REQUEST)
+            return
+        if order is None:
+            self.send_json({"error": "Order not found."}, HTTPStatus.NOT_FOUND)
+            return
+        self.database.mirror_orders_json()
+        self.event_broker.publish("order.updated", {"reference": order["reference"], "order": order})
+        self.send_json({"message": "Delivery status updated successfully.", "order": order})
 
     def create_product(self, payload: Any) -> None:
         if not isinstance(payload, dict):
@@ -426,7 +389,6 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
         description = normalize_text(payload.get("description"))
         image = normalize_text(payload.get("image"))
         usage = normalize_text(payload.get("usage"))
-
         if not name:
             self.send_json({"error": "Product name is required."}, HTTPStatus.BAD_REQUEST)
             return
@@ -452,12 +414,11 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
         offer: dict[str, Any] | None = None
         if isinstance(offer_payload, dict) and any(offer_payload.values()):
             offer_label = normalize_text(offer_payload.get("label"))
-            raw_original_price = offer_payload.get("originalPrice")
             if not offer_label:
                 self.send_json({"error": "Offer label is required when offer pricing is provided."}, HTTPStatus.BAD_REQUEST)
                 return
             try:
-                original_price = parse_price_value(raw_original_price, "Original price")
+                original_price = parse_price_value(offer_payload.get("originalPrice"), "Original price")
             except ValueError as error:
                 self.send_json({"error": str(error)}, HTTPStatus.BAD_REQUEST)
                 return
@@ -467,7 +428,7 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
             offer = {"label": offer_label, "originalPrice": original_price}
 
         with DATA_LOCK:
-            products = get_products()
+            products = get_products(self.settings)
             product = {
                 "id": build_next_product_id(products),
                 "name": name,
@@ -481,107 +442,65 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
                 "offer": offer,
             }
             products.append(product)
-            write_json(PRODUCTS_FILE, products)
+            write_json(self.settings.products_file, products)
 
-        self.send_json(
-            {
-                "message": "Product added successfully.",
-                "item": product,
-            },
-            HTTPStatus.CREATED,
-        )
+        self.send_json({"message": "Product added successfully.", "item": product}, HTTPStatus.CREATED)
 
-    def create_order(self, payload: Any) -> None:
-        if not isinstance(payload, dict):
-            self.send_json({"error": "Order payload must be an object."}, HTTPStatus.BAD_REQUEST)
-            return
-
-        customer = payload.get("customer")
-        items_payload = payload.get("items")
-        source = str(payload.get("source", "website"))
-
-        if not isinstance(customer, dict):
-            self.send_json({"error": "Customer details are required."}, HTTPStatus.BAD_REQUEST)
-            return
-
-        name = str(customer.get("name", "")).strip()
-        phone = normalize_phone(str(customer.get("phone", "")))
-        address = str(customer.get("address", "")).strip()
-
-        if not name:
-            self.send_json({"error": "Customer name is required."}, HTTPStatus.BAD_REQUEST)
-            return
-        phone_error = validate_phone(phone)
-        if phone_error:
-            self.send_json({"error": phone_error}, HTTPStatus.BAD_REQUEST)
-            return
-        if not address:
-            self.send_json({"error": "Delivery address is required."}, HTTPStatus.BAD_REQUEST)
-            return
-
-        products = get_products()
+    def create_checkout(self, payload: Any) -> None:
         try:
-            line_items, total_amount = calculate_order(items_payload, products)
+            order = self.order_service.create_checkout(payload)
         except ValueError as error:
             self.send_json({"error": str(error)}, HTTPStatus.BAD_REQUEST)
             return
+        except Exception as error:  # pragma: no cover - defensive branch
+            self.send_json({"error": f"Unable to process checkout right now: {error}"}, HTTPStatus.INTERNAL_SERVER_ERROR)
+            return
 
-        with DATA_LOCK:
-            orders = get_orders()
-            reference = build_order_reference(orders)
-            order = {
-                "id": reference,
-                "reference": reference,
-                "status": "pending",
-                "source": source,
-                "createdAt": utc_now_iso(),
-                "customer": {
-                    "name": name,
-                    "phone": phone,
-                    "address": address,
-                },
-                "items": line_items,
-                "totalAmount": total_amount,
-            }
-            message = build_whatsapp_message(order)
-            order["whatsappMessage"] = message
-            orders.append(order)
-            write_json(ORDERS_FILE, orders)
-
+        payment = order.get("payment") or {}
+        payment_status = str(payment.get("status", order.get("paymentStatus", "pending"))).lower()
+        message = "Checkout submitted successfully. Complete the M-Pesa prompt on your phone."
+        if payment_status == "failed":
+            message = "Order saved, but M-Pesa STK Push could not start. You can fall back to WhatsApp while credentials are being finalized."
+        elif payment_status == "cancelled":
+            message = "Order saved, but the M-Pesa payment was cancelled."
         self.send_json(
             {
-                "message": "Order created successfully.",
+                "message": message,
                 "order": order,
-                "whatsappUrl": make_whatsapp_url(message),
+                "whatsappUrl": order.get("whatsappUrl", ""),
             },
             HTTPStatus.CREATED,
         )
+
+    def handle_mpesa_callback(self, payload: Any) -> None:
+        if not isinstance(payload, dict):
+            self.send_json({"error": "Callback payload must be an object."}, HTTPStatus.BAD_REQUEST)
+            return
+        order = self.order_service.handle_mpesa_callback(payload)
+        if order is None:
+            self.send_json({"message": "Callback received, but no matching transaction was found."})
+            return
+        self.send_json({"message": "Callback processed successfully.", "order": order})
 
     def subscribe_newsletter(self, payload: Any) -> None:
         if not isinstance(payload, dict):
             self.send_json({"error": "Newsletter payload must be an object."}, HTTPStatus.BAD_REQUEST)
             return
 
-        email = str(payload.get("email", ""))
-        email_error = validate_email(email)
+        email = str(payload.get("email", "")).strip().lower()
+        email_error = validate_email(email, required=True)
         if email_error:
             self.send_json({"error": email_error}, HTTPStatus.BAD_REQUEST)
             return
-        normalized_email = email.strip().lower()
 
         with DATA_LOCK:
-            subscribers = get_newsletter_subscribers()
-            if any(entry.get("email") == normalized_email for entry in subscribers):
-                self.send_json(
-                    {
-                        "message": "This email is already subscribed.",
-                        "alreadySubscribed": True,
-                    }
-                )
+            subscribers = get_newsletter_subscribers(self.settings)
+            if any(entry.get("email") == email for entry in subscribers):
+                self.send_json({"message": "This email is already subscribed.", "alreadySubscribed": True})
                 return
-            entry = {"email": normalized_email, "createdAt": utc_now_iso()}
+            entry = {"email": email, "createdAt": datetime.utcnow().isoformat() + "Z"}
             subscribers.append(entry)
-            write_json(NEWSLETTER_FILE, subscribers)
+            write_json(self.settings.newsletter_file, subscribers)
 
         self.send_json(
             {
@@ -604,18 +523,13 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
             return
 
         with DATA_LOCK:
-            members = get_loyalty_members()
+            members = get_loyalty_members(self.settings)
             if any(entry.get("phone") == phone for entry in members):
-                self.send_json(
-                    {
-                        "message": "You are already a loyalty member.",
-                        "alreadyMember": True,
-                    }
-                )
+                self.send_json({"message": "You are already a loyalty member.", "alreadyMember": True})
                 return
-            entry = {"phone": phone, "createdAt": utc_now_iso()}
+            entry = {"phone": phone, "createdAt": datetime.utcnow().isoformat() + "Z"}
             members.append(entry)
-            write_json(LOYALTY_FILE, members)
+            write_json(self.settings.loyalty_file, members)
 
         self.send_json(
             {
@@ -626,16 +540,67 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
             HTTPStatus.CREATED,
         )
 
+    def stream_admin_events(self) -> None:
+        subscriber = self.event_broker.subscribe()
+        self.send_response(HTTPStatus.OK)
+        self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Connection", "keep-alive")
+        self.end_headers()
 
-def create_server(host: str = HOST, port: int = PORT) -> ThreadingHTTPServer:
-    ensure_data_files()
-    return ThreadingHTTPServer((host, port), BlessingRequestHandler)
+        try:
+            self.wfile.write(b"retry: 2000\n\n")
+            self.wfile.flush()
+            while True:
+                try:
+                    # SSE keeps the admin dashboard in sync without requiring manual refreshes.
+                    event = subscriber.get(timeout=15)
+                    payload = json.dumps(event)
+                    self.wfile.write(f"event: {event['type']}\n".encode("utf-8"))
+                    self.wfile.write(f"data: {payload}\n\n".encode("utf-8"))
+                except queue.Empty:
+                    self.wfile.write(b": keep-alive\n\n")
+                self.wfile.flush()
+        except (BrokenPipeError, ConnectionResetError):
+            return
+        finally:
+            self.event_broker.unsubscribe(subscriber)
+
+
+def create_server(host: str | None = None, port: int | None = None) -> ThreadingHTTPServer:
+    settings = load_settings()
+    if host is not None:
+        settings.host = host
+    if port is not None:
+        settings.port = port
+
+    ensure_data_files(settings)
+    database = Database(settings)
+    database.initialize()
+    event_broker = EventBroker()
+    email_service = EmailService(settings, database)
+    mpesa_service = MpesaService(settings)
+    order_service = OrderService(settings, database, event_broker, email_service, mpesa_service)
+    admin_api = AdminDashboardApi(
+        database=database,
+        products_loader=lambda: get_products(settings),
+        newsletter_loader=lambda: get_newsletter_subscribers(settings),
+        loyalty_loader=lambda: get_loyalty_members(settings),
+    )
+
+    BlessingRequestHandler.settings = settings
+    BlessingRequestHandler.database = database
+    BlessingRequestHandler.event_broker = event_broker
+    BlessingRequestHandler.order_service = order_service
+    BlessingRequestHandler.admin_api = admin_api
+    return ThreadingHTTPServer((settings.host, settings.port), BlessingRequestHandler)
 
 
 def parse_args() -> argparse.Namespace:
+    settings = load_settings()
     parser = argparse.ArgumentParser(description="Run the Blessing Enterprise backend server.")
-    parser.add_argument("--host", default=os.environ.get("BLESSING_HOST", HOST), help="Host interface to bind to.")
-    parser.add_argument("--port", type=int, default=int(os.environ.get("BLESSING_PORT", PORT)), help="Port to listen on.")
+    parser.add_argument("--host", default=settings.host, help="Host interface to bind to.")
+    parser.add_argument("--port", type=int, default=settings.port, help="Port to listen on.")
     return parser.parse_args()
 
 

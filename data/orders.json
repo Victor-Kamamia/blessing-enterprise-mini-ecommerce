@@ -1,13 +1,721 @@
 [
   {
-    "id": "ORD-20260409-0001",
-    "reference": "ORD-20260409-0001",
-    "status": "pending",
+    "id": "ORD-20260429-0012",
+    "reference": "ORD-20260429-0012",
+    "status": "paid",
+    "paymentStatus": "paid",
     "source": "website",
-    "createdAt": "2026-04-09T11:38:13+00:00",
+    "deliveryStatus": "on_delivery",
+    "createdAt": "2026-04-29T15:56:05+00:00",
+    "updatedAt": "2026-04-29T15:57:10+00:00",
+    "deliveryUpdatedAt": "2026-04-29T15:57:10+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "James Thuku",
+      "phone": "01115558874",
+      "email": "thuku@gmail.com",
+      "address": "nakuru"
+    },
+    "items": [
+      {
+        "id": 2,
+        "name": "Luxury Matte Lipstick",
+        "category": "Lips",
+        "image": "imag/lipstick.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      },
+      {
+        "id": 5,
+        "name": "Vitamin C Glow Serum",
+        "category": "Facials",
+        "image": "imag/vitamin-c-serum.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      },
+      {
+        "id": 8,
+        "name": "Shea Butter Hand Cream",
+        "category": "Handcare",
+        "image": "imag/hand-cream.png",
+        "quantity": 1,
+        "unitPrice": 25.0,
+        "lineTotal": 25.0
+      }
+    ],
+    "totalAmount": 55.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0012\nMy name is: James Thuku\nPhone: 01115558874\nEmail: thuku@gmail.com\n\nI would like to place an order:\n\n1. Luxury Matte Lipstick (x1) - KES 15.00\n2. Vitamin C Glow Serum (x1) - KES 15.00\n3. Shea Butter Hand Cream (x1) - KES 25.00\n\nTotal: KES 55.00\n\nDelivery Address:\nnakuru\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0012%0AMy%20name%20is%3A%20James%20Thuku%0APhone%3A%2001115558874%0AEmail%3A%20thuku%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Luxury%20Matte%20Lipstick%20%28x1%29%20-%20KES%2015.00%0A2.%20Vitamin%20C%20Glow%20Serum%20%28x1%29%20-%20KES%2015.00%0A3.%20Shea%20Butter%20Hand%20Cream%20%28x1%29%20-%20KES%2025.00%0A%0ATotal%3A%20KES%2055.00%0A%0ADelivery%20Address%3A%0Anakuru%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 55.0,
+      "phoneNumber": "2541115558874",
+      "merchantRequestId": "mock-merchant-19bf3ca7",
+      "checkoutRequestId": "mock-checkout-ffa0c1be6511",
+      "mpesaReceiptNumber": "MOCKBE6511",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T15:56:13+00:00",
+      "createdAt": "2026-04-29T15:56:05+00:00",
+      "updatedAt": "2026-04-29T15:56:13+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0011",
+    "reference": "ORD-20260429-0011",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T14:50:37+00:00",
+    "updatedAt": "2026-04-29T15:57:17+00:00",
+    "deliveryUpdatedAt": "2026-04-29T15:57:17+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "kameme kayu ka muingi",
+      "phone": "0710194432",
+      "email": "kameme@gmail.com",
+      "address": "mmu"
+    },
+    "items": [
+      {
+        "id": 3,
+        "name": "Silk Hair Oil",
+        "category": "Haircare",
+        "image": "imag/hair-oil.png",
+        "quantity": 1,
+        "unitPrice": 25.0,
+        "lineTotal": 25.0
+      },
+      {
+        "id": 2,
+        "name": "Luxury Matte Lipstick",
+        "category": "Lips",
+        "image": "imag/lipstick.png",
+        "quantity": 2,
+        "unitPrice": 15.0,
+        "lineTotal": 30.0
+      },
+      {
+        "id": 5,
+        "name": "Vitamin C Glow Serum",
+        "category": "Facials",
+        "image": "imag/vitamin-c-serum.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      },
+      {
+        "id": 8,
+        "name": "Shea Butter Hand Cream",
+        "category": "Handcare",
+        "image": "imag/hand-cream.png",
+        "quantity": 1,
+        "unitPrice": 25.0,
+        "lineTotal": 25.0
+      },
+      {
+        "id": 16,
+        "name": "Whipped Cocoa Body Butter",
+        "category": "Bodycare",
+        "image": "imag/product-body-butter.jpg",
+        "quantity": 1,
+        "unitPrice": 19.0,
+        "lineTotal": 19.0
+      }
+    ],
+    "totalAmount": 114.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0011\nMy name is: kameme kayu ka muingi\nPhone: 0710194432\nEmail: kameme@gmail.com\n\nI would like to place an order:\n\n1. Silk Hair Oil (x1) - KES 25.00\n2. Luxury Matte Lipstick (x2) - KES 30.00\n3. Vitamin C Glow Serum (x1) - KES 15.00\n4. Shea Butter Hand Cream (x1) - KES 25.00\n5. Whipped Cocoa Body Butter (x1) - KES 19.00\n\nTotal: KES 114.00\n\nDelivery Address:\nmmu\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0011%0AMy%20name%20is%3A%20kameme%20kayu%20ka%20muingi%0APhone%3A%200710194432%0AEmail%3A%20kameme%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Silk%20Hair%20Oil%20%28x1%29%20-%20KES%2025.00%0A2.%20Luxury%20Matte%20Lipstick%20%28x2%29%20-%20KES%2030.00%0A3.%20Vitamin%20C%20Glow%20Serum%20%28x1%29%20-%20KES%2015.00%0A4.%20Shea%20Butter%20Hand%20Cream%20%28x1%29%20-%20KES%2025.00%0A5.%20Whipped%20Cocoa%20Body%20Butter%20%28x1%29%20-%20KES%2019.00%0A%0ATotal%3A%20KES%20114.00%0A%0ADelivery%20Address%3A%0Ammu%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 114.0,
+      "phoneNumber": "254710194432",
+      "merchantRequestId": "mock-merchant-31110ed0",
+      "checkoutRequestId": "mock-checkout-5be694d1ea10",
+      "mpesaReceiptNumber": "MOCKD1EA10",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T14:50:45+00:00",
+      "createdAt": "2026-04-29T14:50:37+00:00",
+      "updatedAt": "2026-04-29T14:50:45+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0010",
+    "reference": "ORD-20260429-0010",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T14:08:43+00:00",
+    "updatedAt": "2026-04-29T14:47:13+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:47:13+00:00",
+    "currency": "KES",
     "customer": {
       "name": "victor kamamia",
       "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "town area"
+    },
+    "items": [
+      {
+        "id": 1,
+        "name": "Radiant Glow Serum",
+        "category": "Facials",
+        "image": "imag/serum.png",
+        "quantity": 1,
+        "unitPrice": 20.0,
+        "lineTotal": 20.0
+      }
+    ],
+    "totalAmount": 20.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0010\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Radiant Glow Serum (x1) - KES 20.00\n\nTotal: KES 20.00\n\nDelivery Address:\ntown area\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0010%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Radiant%20Glow%20Serum%20%28x1%29%20-%20KES%2020.00%0A%0ATotal%3A%20KES%2020.00%0A%0ADelivery%20Address%3A%0Atown%20area%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 20.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-97223621",
+      "checkoutRequestId": "mock-checkout-ecad6731f8e3",
+      "mpesaReceiptNumber": "MOCK31F8E3",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T14:08:51+00:00",
+      "createdAt": "2026-04-29T14:08:43+00:00",
+      "updatedAt": "2026-04-29T14:08:51+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0009",
+    "reference": "ORD-20260429-0009",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T14:03:35+00:00",
+    "updatedAt": "2026-04-29T14:45:52+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:45:52+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "lanet umoja\nkamoronyo primary school"
+    },
+    "items": [
+      {
+        "id": 2,
+        "name": "Luxury Matte Lipstick",
+        "category": "Lips",
+        "image": "imag/lipstick.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      }
+    ],
+    "totalAmount": 15.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0009\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Luxury Matte Lipstick (x1) - KES 15.00\n\nTotal: KES 15.00\n\nDelivery Address:\nlanet umoja\nkamoronyo primary school\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0009%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Luxury%20Matte%20Lipstick%20%28x1%29%20-%20KES%2015.00%0A%0ATotal%3A%20KES%2015.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0Akamoronyo%20primary%20school%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 15.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-67cd7af8",
+      "checkoutRequestId": "mock-checkout-9a45b53b275f",
+      "mpesaReceiptNumber": "MOCK3B275F",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T14:03:44+00:00",
+      "createdAt": "2026-04-29T14:03:35+00:00",
+      "updatedAt": "2026-04-29T14:03:44+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0008",
+    "reference": "ORD-20260429-0008",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T14:01:57+00:00",
+    "updatedAt": "2026-04-29T14:47:33+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:47:33+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "town area"
+    },
+    "items": [
+      {
+        "id": 3,
+        "name": "Silk Hair Oil",
+        "category": "Haircare",
+        "image": "imag/hair-oil.png",
+        "quantity": 1,
+        "unitPrice": 25.0,
+        "lineTotal": 25.0
+      },
+      {
+        "id": 5,
+        "name": "Vitamin C Glow Serum",
+        "category": "Facials",
+        "image": "imag/vitamin-c-serum.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      }
+    ],
+    "totalAmount": 40.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0008\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Silk Hair Oil (x1) - KES 25.00\n2. Vitamin C Glow Serum (x1) - KES 15.00\n\nTotal: KES 40.00\n\nDelivery Address:\ntown area\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0008%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Silk%20Hair%20Oil%20%28x1%29%20-%20KES%2025.00%0A2.%20Vitamin%20C%20Glow%20Serum%20%28x1%29%20-%20KES%2015.00%0A%0ATotal%3A%20KES%2040.00%0A%0ADelivery%20Address%3A%0Atown%20area%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 40.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-4df7e86d",
+      "checkoutRequestId": "mock-checkout-6e0c076c7a15",
+      "mpesaReceiptNumber": "MOCK6C7A15",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T14:02:05+00:00",
+      "createdAt": "2026-04-29T14:01:57+00:00",
+      "updatedAt": "2026-04-29T14:02:05+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0007",
+    "reference": "ORD-20260429-0007",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T13:31:59+00:00",
+    "updatedAt": "2026-04-29T14:46:25+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:46:25+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "lanet umoja\nkamoronyo primary school"
+    },
+    "items": [
+      {
+        "id": 1,
+        "name": "Radiant Glow Serum",
+        "category": "Facials",
+        "image": "imag/serum.png",
+        "quantity": 1,
+        "unitPrice": 20.0,
+        "lineTotal": 20.0
+      }
+    ],
+    "totalAmount": 20.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0007\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Radiant Glow Serum (x1) - KES 20.00\n\nTotal: KES 20.00\n\nDelivery Address:\nlanet umoja\nkamoronyo primary school\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0007%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Radiant%20Glow%20Serum%20%28x1%29%20-%20KES%2020.00%0A%0ATotal%3A%20KES%2020.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0Akamoronyo%20primary%20school%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 20.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-32be788e",
+      "checkoutRequestId": "mock-checkout-065174afcb69",
+      "mpesaReceiptNumber": "MOCKAFCB69",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T13:32:07+00:00",
+      "createdAt": "2026-04-29T13:31:59+00:00",
+      "updatedAt": "2026-04-29T13:32:07+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0006",
+    "reference": "ORD-20260429-0006",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T13:21:27+00:00",
+    "updatedAt": "2026-04-29T14:46:28+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:46:28+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "lanet umoja\nkamoronyo primary school"
+    },
+    "items": [
+      {
+        "id": 6,
+        "name": "Nourishing Body Oil",
+        "category": "Bodycare",
+        "image": "imag/body-oil.png",
+        "quantity": 1,
+        "unitPrice": 20.0,
+        "lineTotal": 20.0
+      }
+    ],
+    "totalAmount": 20.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0006\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Nourishing Body Oil (x1) - KES 20.00\n\nTotal: KES 20.00\n\nDelivery Address:\nlanet umoja\nkamoronyo primary school\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0006%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Nourishing%20Body%20Oil%20%28x1%29%20-%20KES%2020.00%0A%0ATotal%3A%20KES%2020.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0Akamoronyo%20primary%20school%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 20.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-53344ac4",
+      "checkoutRequestId": "mock-checkout-dc6a93cdd74f",
+      "mpesaReceiptNumber": "MOCKCDD74F",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T13:21:35+00:00",
+      "createdAt": "2026-04-29T13:21:27+00:00",
+      "updatedAt": "2026-04-29T13:21:35+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0005",
+    "reference": "ORD-20260429-0005",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T13:20:57+00:00",
+    "updatedAt": "2026-04-29T14:46:32+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:46:32+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "lanet umoja\nkamoronyo primary school"
+    },
+    "items": [
+      {
+        "id": 2,
+        "name": "Luxury Matte Lipstick",
+        "category": "Lips",
+        "image": "imag/lipstick.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      }
+    ],
+    "totalAmount": 15.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0005\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Luxury Matte Lipstick (x1) - KES 15.00\n\nTotal: KES 15.00\n\nDelivery Address:\nlanet umoja\nkamoronyo primary school\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0005%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Luxury%20Matte%20Lipstick%20%28x1%29%20-%20KES%2015.00%0A%0ATotal%3A%20KES%2015.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0Akamoronyo%20primary%20school%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 15.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-9667c406",
+      "checkoutRequestId": "mock-checkout-11e119f300b6",
+      "mpesaReceiptNumber": "MOCKF300B6",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T13:21:06+00:00",
+      "createdAt": "2026-04-29T13:20:57+00:00",
+      "updatedAt": "2026-04-29T13:21:06+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0004",
+    "reference": "ORD-20260429-0004",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T13:19:10+00:00",
+    "updatedAt": "2026-04-29T14:46:32+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:46:32+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "lanet umoja\nkamoronyo primary school"
+    },
+    "items": [
+      {
+        "id": 2,
+        "name": "Luxury Matte Lipstick",
+        "category": "Lips",
+        "image": "imag/lipstick.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      },
+      {
+        "id": 1,
+        "name": "Radiant Glow Serum",
+        "category": "Facials",
+        "image": "imag/serum.png",
+        "quantity": 1,
+        "unitPrice": 20.0,
+        "lineTotal": 20.0
+      },
+      {
+        "id": 3,
+        "name": "Silk Hair Oil",
+        "category": "Haircare",
+        "image": "imag/hair-oil.png",
+        "quantity": 1,
+        "unitPrice": 25.0,
+        "lineTotal": 25.0
+      }
+    ],
+    "totalAmount": 60.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0004\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Luxury Matte Lipstick (x1) - KES 15.00\n2. Radiant Glow Serum (x1) - KES 20.00\n3. Silk Hair Oil (x1) - KES 25.00\n\nTotal: KES 60.00\n\nDelivery Address:\nlanet umoja\nkamoronyo primary school\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0004%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Luxury%20Matte%20Lipstick%20%28x1%29%20-%20KES%2015.00%0A2.%20Radiant%20Glow%20Serum%20%28x1%29%20-%20KES%2020.00%0A3.%20Silk%20Hair%20Oil%20%28x1%29%20-%20KES%2025.00%0A%0ATotal%3A%20KES%2060.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0Akamoronyo%20primary%20school%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 60.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-e24bef37",
+      "checkoutRequestId": "mock-checkout-4ba82adf53a1",
+      "mpesaReceiptNumber": "MOCKDF53A1",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T13:19:18+00:00",
+      "createdAt": "2026-04-29T13:19:10+00:00",
+      "updatedAt": "2026-04-29T13:19:18+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0003",
+    "reference": "ORD-20260429-0003",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T13:17:47+00:00",
+    "updatedAt": "2026-04-29T14:46:33+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:46:33+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "lanet umoja\nkamoronyo primary school"
+    },
+    "items": [
+      {
+        "id": 9,
+        "name": "Luxury Lip Balm",
+        "category": "Lips",
+        "image": "imag/lip-balm.png",
+        "quantity": 1,
+        "unitPrice": 20.0,
+        "lineTotal": 20.0
+      }
+    ],
+    "totalAmount": 20.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0003\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Luxury Lip Balm (x1) - KES 20.00\n\nTotal: KES 20.00\n\nDelivery Address:\nlanet umoja\nkamoronyo primary school\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0003%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Luxury%20Lip%20Balm%20%28x1%29%20-%20KES%2020.00%0A%0ATotal%3A%20KES%2020.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0Akamoronyo%20primary%20school%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 20.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-90d6abf2",
+      "checkoutRequestId": "mock-checkout-6bf702aa374d",
+      "mpesaReceiptNumber": "MOCKAA374D",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T13:17:55+00:00",
+      "createdAt": "2026-04-29T13:17:47+00:00",
+      "updatedAt": "2026-04-29T13:17:55+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0002",
+    "reference": "ORD-20260429-0002",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T12:34:14+00:00",
+    "updatedAt": "2026-04-29T14:46:34+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:46:34+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "",
+      "address": "lanet umoja"
+    },
+    "items": [
+      {
+        "id": 6,
+        "name": "Nourishing Body Oil",
+        "category": "Bodycare",
+        "image": "imag/body-oil.png",
+        "quantity": 1,
+        "unitPrice": 20.0,
+        "lineTotal": 20.0
+      },
+      {
+        "id": 2,
+        "name": "Luxury Matte Lipstick",
+        "category": "Lips",
+        "image": "imag/lipstick.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      },
+      {
+        "id": 5,
+        "name": "Vitamin C Glow Serum",
+        "category": "Facials",
+        "image": "imag/vitamin-c-serum.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      },
+      {
+        "id": 8,
+        "name": "Shea Butter Hand Cream",
+        "category": "Handcare",
+        "image": "imag/hand-cream.png",
+        "quantity": 1,
+        "unitPrice": 25.0,
+        "lineTotal": 25.0
+      },
+      {
+        "id": 16,
+        "name": "Whipped Cocoa Body Butter",
+        "category": "Bodycare",
+        "image": "imag/product-body-butter.jpg",
+        "quantity": 1,
+        "unitPrice": 19.0,
+        "lineTotal": 19.0
+      }
+    ],
+    "totalAmount": 94.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0002\nMy name is: victor kamamia\nPhone: 0111554776\n\nI would like to place an order:\n\n1. Nourishing Body Oil (x1) - KES 20.00\n2. Luxury Matte Lipstick (x1) - KES 15.00\n3. Vitamin C Glow Serum (x1) - KES 15.00\n4. Shea Butter Hand Cream (x1) - KES 25.00\n5. Whipped Cocoa Body Butter (x1) - KES 19.00\n\nTotal: KES 94.00\n\nDelivery Address:\nlanet umoja\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0002%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Nourishing%20Body%20Oil%20%28x1%29%20-%20KES%2020.00%0A2.%20Luxury%20Matte%20Lipstick%20%28x1%29%20-%20KES%2015.00%0A3.%20Vitamin%20C%20Glow%20Serum%20%28x1%29%20-%20KES%2015.00%0A4.%20Shea%20Butter%20Hand%20Cream%20%28x1%29%20-%20KES%2025.00%0A5.%20Whipped%20Cocoa%20Body%20Butter%20%28x1%29%20-%20KES%2019.00%0A%0ATotal%3A%20KES%2094.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 94.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-f48e6f73",
+      "checkoutRequestId": "mock-checkout-8bf80d39e995",
+      "mpesaReceiptNumber": "MOCK39E995",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T12:34:23+00:00",
+      "createdAt": "2026-04-29T12:34:14+00:00",
+      "updatedAt": "2026-04-29T12:34:23+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260429-0001",
+    "reference": "ORD-20260429-0001",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-29T12:06:44+00:00",
+    "updatedAt": "2026-04-29T14:46:36+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:46:36+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "",
+      "address": "lanet umoja"
+    },
+    "items": [
+      {
+        "id": 14,
+        "name": "Berry Kiss Lip Balm",
+        "category": "Lips",
+        "image": "imag/product-lip-balm-berry.jpg",
+        "quantity": 1,
+        "unitPrice": 12.0,
+        "lineTotal": 12.0
+      },
+      {
+        "id": 4,
+        "name": "Hydrating Face Lotion",
+        "category": "Facials",
+        "image": "imag/face-lotion.png",
+        "quantity": 1,
+        "unitPrice": 20.0,
+        "lineTotal": 20.0
+      }
+    ],
+    "totalAmount": 32.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260429-0001\nMy name is: victor kamamia\nPhone: 0111554776\n\nI would like to place an order:\n\n1. Berry Kiss Lip Balm (x1) - KES 12.00\n2. Hydrating Face Lotion (x1) - KES 20.00\n\nTotal: KES 32.00\n\nDelivery Address:\nlanet umoja\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260429-0001%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Berry%20Kiss%20Lip%20Balm%20%28x1%29%20-%20KES%2012.00%0A2.%20Hydrating%20Face%20Lotion%20%28x1%29%20-%20KES%2020.00%0A%0ATotal%3A%20KES%2032.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 32.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-421c7837",
+      "checkoutRequestId": "mock-checkout-a14b067dbf37",
+      "mpesaReceiptNumber": "MOCK7DBF37",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-29T12:06:52+00:00",
+      "createdAt": "2026-04-29T12:06:44+00:00",
+      "updatedAt": "2026-04-29T12:06:52+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260409-0001",
+    "reference": "ORD-20260409-0001",
+    "status": "pending",
+    "paymentStatus": "pending",
+    "source": "website",
+    "deliveryStatus": "delivered",
+    "createdAt": "2026-04-09T11:38:13+00:00",
+    "updatedAt": "2026-04-29T14:47:28+00:00",
+    "deliveryUpdatedAt": "2026-04-29T14:47:28+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "",
       "address": "lanet umoja"
     },
     "items": [
@@ -40,6 +748,9 @@
       }
     ],
     "totalAmount": 115.0,
-    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260409-0001\nMy name is: victor kamamia\nPhone: 0111554776\n\nI would like to place an order:\n\n1. Vitamin C Glow Serum (x2) - $30.00\n2. Shea Butter Hand Cream (x1) - $25.00\n3. Luxury Matte Lipstick (x4) - $60.00\n\nTotal: $115.00\n\nDelivery Address:\nlanet umoja\n\nThank you!"
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260409-0001\nMy name is: victor kamamia\nPhone: 0111554776\n\nI would like to place an order:\n\n1. Vitamin C Glow Serum (x2) - $30.00\n2. Shea Butter Hand Cream (x1) - $25.00\n3. Luxury Matte Lipstick (x4) - $60.00\n\nTotal: $115.00\n\nDelivery Address:\nlanet umoja\n\nThank you!",
+    "whatsappUrl": "",
+    "notes": "",
+    "payment": null
   }
 ]

@@ -64,18 +64,21 @@
         display: flex;
         flex-direction: column;
         overflow-x: hidden;
+        background-color: #2a1242;
 
         /* Background image with SUBTLER gradient overlay */
         background:
           linear-gradient(
             135deg,
-            rgba(255, 21, 130, 0.05),
-            rgba(145, 60, 220, 0.05)
+            rgba(42, 18, 66, 0.64),
+            rgba(98, 45, 150, 0.58)
           ),
-          url("imag/background1.png") center / cover no-repeat;
+          url("imag/background1.png") center / cover no-repeat,
+          #2a1242;
+        background-attachment: fixed, fixed, fixed;
 
         background-blend-mode: normal;
-        color: var(--brand-ink);
+        color: #fff7ff;
       }
 
       body.modal-open {
@@ -87,6 +90,34 @@
         =========================== */
       h1, h2, h3 {
         font-family: "Playfair Display", serif;
+      }
+
+      body > main,
+      #main-content {
+        color: #fff7ff;
+      }
+
+      #main-content :is(h1, h2, h3, h4, h5, h6) {
+        color: #ffffff !important;
+        text-shadow: 0 2px 18px rgba(28, 10, 46, 0.32);
+      }
+
+      #main-content :is(p, li, span, small),
+      #main-content :is(.text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800),
+      #main-content :is(.text-slate-300, .text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700) {
+        color: rgba(255, 247, 255, 0.9) !important;
+      }
+
+      #main-content :is(input, textarea, select, option),
+      #main-content :is(input, textarea, select)::placeholder,
+      #main-content .product-card :is(h1, h2, h3, h4, h5, h6, p, span, small),
+      #main-content .toolbar-chip,
+      #main-content .hero-badge,
+      #main-content .bg-white :is(h1, h2, h3, h4, h5, h6, p, span, small),
+      #main-content .bg-white\/82,
+      #main-content .bg-white\/78 {
+        color: var(--brand-ink) !important;
+        text-shadow: none;
       }
 
       /* ===========================
@@ -166,6 +197,10 @@
         color: #ffffff !important;
         border: none !important;
         box-shadow: 0 14px 30px rgba(142, 68, 173, 0.18);
+      }
+
+      nav button span {
+        color: #ffffff !important;
       }
 
       nav ul a {
@@ -418,6 +453,163 @@
       #main-content .bg-rose-100,
       #main-content .bg-pink-50 { background: rgba(255, 240, 247, 0.85) !important; }
 
+      #main-content,
+      #main-content :is(h1, h2, h3, h4, h5, h6) {
+        color: #ffffff !important;
+      }
+
+      #main-content :is(p, li, small),
+      #main-content :is(.text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800),
+      #main-content :is(.text-slate-300, .text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700) {
+        color: rgba(255, 247, 255, 0.9) !important;
+      }
+
+      #main-content :is(input, textarea, select, option),
+      #main-content :is(input, textarea, select)::placeholder,
+      #main-content .product-card :is(h1, h2, h3, h4, h5, h6, p, li, span, small),
+      #main-content .toolbar-chip,
+      #main-content .hero-badge,
+      #main-content .bg-white\/82,
+      #main-content .bg-white\/78 {
+        color: var(--brand-ink) !important;
+        text-shadow: none !important;
+      }
+
+      #main-content :is(
+        .glass-panel,
+        .main-surface,
+        .interactive-card,
+        .product-card,
+        .review-card,
+        .category-card,
+        .benefit-card,
+        .admin-surface-card,
+        .admin-pane,
+        .toolbar-chip,
+        .hero-badge,
+        .bg-white,
+        .bg-white\/50,
+        .bg-white\/78,
+        .bg-white\/82,
+        .bg-rose-50,
+        .bg-rose-100,
+        .bg-pink-50,
+        .bg-violet-100
+      ),
+      #newsletter-popup .bg-white,
+      #cart-modal > div,
+      #checkout-modal > div,
+      #product-details-modal > div,
+      #beauty-quiz-modal > div {
+        color: var(--brand-ink) !important;
+        text-shadow: none !important;
+      }
+
+      #main-content :is(
+        .glass-panel,
+        .main-surface,
+        .interactive-card,
+        .product-card,
+        .review-card,
+        .category-card,
+        .benefit-card,
+        .admin-surface-card,
+        .admin-pane,
+        .toolbar-chip,
+        .hero-badge,
+        .bg-white,
+        .bg-white\/50,
+        .bg-white\/78,
+        .bg-white\/82,
+        .bg-rose-50,
+        .bg-rose-100,
+        .bg-pink-50,
+        .bg-violet-100
+      ) :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+      #newsletter-popup .bg-white :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+      #cart-modal > div :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+      #checkout-modal > div :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+      #product-details-modal > div :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+      #beauty-quiz-modal > div :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong) {
+        color: var(--brand-ink) !important;
+        text-shadow: none !important;
+      }
+
+      #main-content :is(
+        .hero-banner,
+        .products-hero,
+        .from-pink-500,
+        .from-purple-600,
+        .from-fuchsia-500,
+        .from-rose-500,
+        .bg-pink-500,
+        .bg-rose-600,
+        .bg-violet-600,
+        .bg-red-500,
+        .btn-primary
+      ),
+      #main-content :is(
+        .hero-banner,
+        .products-hero,
+        .from-pink-500,
+        .from-purple-600,
+        .from-fuchsia-500,
+        .from-rose-500,
+        .bg-pink-500,
+        .bg-rose-600,
+        .bg-violet-600,
+        .bg-red-500,
+        .btn-primary
+      ) :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong) {
+        color: #ffffff !important;
+      }
+
+      #main-content :is(
+        .glass-panel,
+        .main-surface,
+        .interactive-card,
+        .product-card,
+        .review-card,
+        .category-card,
+        .benefit-card,
+        .admin-surface-card,
+        .admin-pane
+      ) :is(
+        .from-pink-500,
+        .from-purple-600,
+        .from-fuchsia-500,
+        .from-rose-500,
+        .bg-pink-500,
+        .bg-rose-600,
+        .bg-violet-600,
+        .bg-red-500,
+        .btn-primary
+      ),
+      #main-content :is(
+        .glass-panel,
+        .main-surface,
+        .interactive-card,
+        .product-card,
+        .review-card,
+        .category-card,
+        .benefit-card,
+        .admin-surface-card,
+        .admin-pane
+      ) :is(
+        .from-pink-500,
+        .from-purple-600,
+        .from-fuchsia-500,
+        .from-rose-500,
+        .bg-pink-500,
+        .bg-rose-600,
+        .bg-violet-600,
+        .bg-red-500,
+        .btn-primary
+      ) :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+      #main-content .products-hero .hero-badge {
+        color: #ffffff !important;
+      }
+
       /* ===========================
         Modals
         =========================== */
@@ -426,6 +618,45 @@
       #checkout-modal > div {
         background: rgba(255, 255, 255, 0.88) !important;
         backdrop-filter: blur(8px);
+      }
+
+      #cart-modal,
+      #checkout-modal {
+        align-items: stretch !important;
+        justify-content: flex-end !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+      }
+
+      #cart-modal > div,
+      #checkout-modal > div {
+        height: 100vh;
+        max-height: 100vh !important;
+        width: min(100vw, 32rem) !important;
+        max-width: 32rem !important;
+        border-radius: 2rem 0 0 2rem !important;
+        box-shadow: -24px 0 60px rgba(36, 19, 57, 0.18) !important;
+      }
+
+      .drawer-close-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 3rem;
+        height: 3rem;
+        border-radius: 9999px;
+        background: rgba(255,255,255,0.9);
+        border: 1px solid rgba(142, 68, 173, 0.14);
+        color: var(--brand-purple);
+        font-size: 2rem;
+        line-height: 1;
+        box-shadow: 0 10px 24px rgba(142, 68, 173, 0.1);
+      }
+
+      .drawer-close-button:hover {
+        background: rgba(243, 235, 255, 0.95);
       }
 
       /* ===========================
@@ -661,17 +892,21 @@
     <!-- ============================================ -->
     <!-- 3. CART MODAL - Shopping cart popup          -->
     <!-- ============================================ -->
-    <div id="cart-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 px-4 z-50">
-      <div id="cart-drawer" class="overlay-panel max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl p-6 shadow-xl">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-xl font-bold">Your Cart</h2>
-          <button onclick="closeCart()" class="text-xl text-gray-500 hover:text-gray-700">&times;</button>
+    <div id="cart-modal" class="fixed inset-0 hidden items-stretch justify-end bg-black/50 z-50">
+      <div id="cart-drawer" class="overlay-panel flex h-full w-full max-w-2xl flex-col overflow-hidden rounded-[2rem] p-6 shadow-xl md:p-8">
+        <div class="mb-6 flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-violet-700">Cart</p>
+            <h2 class="mt-2 text-2xl font-bold text-gray-800">Your Selections</h2>
+            <p class="mt-2 text-sm text-gray-500">Review your items, adjust quantities, then continue to checkout when you are ready.</p>
+          </div>
+          <button onclick="closeCart()" class="drawer-close-button shrink-0" aria-label="Close cart drawer">&times;</button>
         </div>
-        <div id="cart-items"></div>
-        <div class="mt-4 border-t pt-4">
+        <div id="cart-items" class="flex-1 overflow-y-auto pr-1"></div>
+        <div class="mt-6 border-t border-pink-100 pt-5">
           <h3 class="text-lg font-semibold">Total: $<span id="cart-total">0</span></h3>
           <button onclick="checkout()" class="mt-4 w-full rounded-lg bg-pink-400 py-3 text-white transition hover:scale-105">
-            Place Order via WhatsApp
+            Place an Order
           </button>
         </div>
       </div>
@@ -693,23 +928,24 @@
     <!-- ============================================ -->
     <!-- 5. CHECKOUT MODAL - Order form               -->
     <!-- ============================================ -->
-    <div id="checkout-modal" class="fixed inset-0 hidden items-center justify-center bg-black/50 px-4 py-8 z-50">
-      <div class="overlay-panel max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[2rem] p-6 shadow-xl">
-        <div class="mb-4 flex items-center justify-between">
+    <div id="checkout-modal" class="fixed inset-0 hidden items-stretch justify-end bg-black/50 z-50">
+      <div class="overlay-panel h-full w-full max-w-2xl overflow-y-auto rounded-[2rem] p-6 shadow-xl md:p-8">
+        <div class="mb-6 flex items-start justify-between gap-4">
           <div>
-            <h2 class="text-xl font-bold text-gray-800">Complete Your Order</h2>
-            <p class="mt-1 text-sm text-gray-500">Fill in your delivery details and continue to WhatsApp.</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.24em] text-violet-700">Checkout</p>
+            <h2 class="mt-2 text-2xl font-bold text-gray-800">Place an Order</h2>
+            <p class="mt-2 text-sm text-gray-500">Enter your details, then provide the M-Pesa number that should receive the STK Push prompt.</p>
           </div>
-          <button onclick="closeCheckoutModal()" class="text-xl text-gray-500 hover:text-gray-700">&times;</button>
+          <button onclick="closeCheckoutModal()" class="drawer-close-button shrink-0" aria-label="Close checkout drawer">&times;</button>
         </div>
 
-        <div class="mb-4 rounded-2xl bg-pink-50 px-4 py-3 text-sm text-gray-700">
-          Order total: <span class="font-semibold">$<span id="checkout-total">0.00</span></span>
+        <div class="mb-5 rounded-2xl bg-pink-50 px-4 py-4 text-sm text-gray-700">
+          Order total: <span class="font-semibold">KES <span id="checkout-total">0.00</span></span>
         </div>
 
         <div id="checkout-status" class="hidden mb-4 rounded-2xl px-4 py-3 text-sm"></div>
 
-        <form id="checkout-form" class="space-y-4">
+        <form id="checkout-form" class="space-y-5">
           <div>
             <label for="customer-name" class="mb-2 block text-sm font-medium text-gray-700">Full name</label>
             <input id="customer-name" name="name" type="text" class="w-full rounded-xl border border-pink-100 px-4 py-3 outline-none focus:border-pink-300" />
@@ -717,9 +953,16 @@
           </div>
 
           <div>
-            <label for="customer-phone" class="mb-2 block text-sm font-medium text-gray-700">Phone number</label>
-            <input id="customer-phone" name="phone" type="tel" class="w-full rounded-xl border border-pink-100 px-4 py-3 outline-none focus:border-pink-300" />
+            <label for="customer-phone" class="mb-2 block text-sm font-medium text-gray-700">M-Pesa phone number</label>
+            <input id="customer-phone" name="phone" type="tel" class="w-full rounded-xl border border-pink-100 px-4 py-3 outline-none focus:border-pink-300" placeholder="e.g. 0712345678" />
+            <p class="mt-2 text-xs text-gray-500">This is the number that will receive the Safaricom M-Pesa payment prompt.</p>
             <p id="phone-error" class="hidden mt-2 text-sm text-rose-600"></p>
+          </div>
+
+          <div>
+            <label for="customer-email" class="mb-2 block text-sm font-medium text-gray-700">Email address <span class="text-xs text-gray-400">(optional)</span></label>
+            <input id="customer-email" name="email" type="email" class="w-full rounded-xl border border-pink-100 px-4 py-3 outline-none focus:border-pink-300" />
+            <p id="email-error" class="hidden mt-2 text-sm text-rose-600"></p>
           </div>
 
           <div>
@@ -730,7 +973,7 @@
 
           <div class="flex flex-col gap-3 sm:flex-row">
             <button type="submit" class="flex-1 rounded-xl bg-pink-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-pink-600">
-              Continue to WhatsApp
+              Place Order
             </button>
             <button type="button" onclick="closeCheckoutModal()" class="flex-1 rounded-xl border border-pink-100 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-pink-50">
               Cancel
@@ -802,7 +1045,7 @@
       <div class="bg-white rounded-2xl max-w-md p-8 relative mx-4">
         <button onclick="closeNewsletterPopup()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">&times;</button>
         <div class="text-center">
-          <div class="text-5xl mb-4">💝</div>
+          <div class="mb-4"><img src="imag/emoji-replacements/gift-box.jpg" alt="Gift box" class="mx-auto h-20 w-20 rounded-full object-cover shadow-soft"></div>
           <h3 class="text-2xl font-bold">Get 10% Off Your First Order!</h3>
           <p class="text-gray-600 mt-2 text-sm">Subscribe to get exclusive offers and beauty tips</p>
           <form id="popup-newsletter" class="mt-6">
@@ -821,7 +1064,7 @@
     <!-- ============================================ -->
     <div class="fixed bottom-20 right-4 z-40 hidden animate-bounce" id="stock-alert">
       <div class="bg-red-500 text-white rounded-lg p-3 shadow-lg max-w-[250px]">
-        <p class="text-xs font-semibold">🔥 Limited Stock!</p>
+        <p class="text-xs font-semibold">Limited Stock</p>
         <p class="text-xs">Matte Lipstick - Only 5 left</p>
         <button type="button" onclick="quickView(2)" class="text-xs underline mt-1">Shop Now →</button>
       </div>
@@ -832,7 +1075,7 @@
     <!-- ============================================ -->
     <section class="section-shell mt-8 mb-8" id="recently-viewed" style="display: none;">
       <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl md:text-3xl text-[var(--ink)]">🔄 Recently Viewed</h2>
+        <h2 class="text-2xl md:text-3xl text-[var(--ink)]">Recently Viewed</h2>
         <a href="#" onclick="clearRecentlyViewed()" class="text-xs text-gray-500 hover:text-pink-500">Clear</a>
       </div>
       <div id="recently-viewed-products" class="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -849,14 +1092,14 @@
             <h3 class="mb-4 text-xl font-serif text-pink-200">Contact Us</h3>
             
             <div class="info-box">
-              <p class="text-sm font-semibold text-pink-200 mb-2">📞 Phone Numbers</p>
+              <p class="text-sm font-semibold text-pink-200 mb-2">Phone Numbers</p>
               <p class="text-sm text-slate-100">Sales: <a href="tel:+254711490385" class="contact-link text-slate-100 hover:text-pink-200">+254 711 490 385</a></p>
               <p class="text-sm text-slate-100">Customer Care: <a href="tel:+254111554776" class="contact-link text-slate-100 hover:text-pink-200">+254 111 554 776</a></p>
               <p class="text-sm text-slate-100">WhatsApp Business: <a href="https://wa.me/254711490385" class="contact-link text-slate-100 hover:text-pink-200">Chat Now →</a></p>
             </div>
             
             <div class="info-box">
-              <p class="text-sm font-semibold text-pink-200 mb-2">✉️ Email Addresses</p>
+              <p class="text-sm font-semibold text-pink-200 mb-2">Email Addresses</p>
               <p class="text-sm text-slate-100">General: <a href="mailto:info@blessingenterprise.com" class="contact-link text-slate-100 hover:text-pink-200">info@blessingenterprise.com</a></p>
               <p class="text-sm text-slate-100">Orders: <a href="mailto:orders@blessingenterprise.com" class="contact-link text-slate-100 hover:text-pink-200">orders@blessingenterprise.com</a></p>
               <p class="text-sm text-slate-100">Support: <a href="mailto:support@blessingenterprise.com" class="contact-link text-slate-100 hover:text-pink-200">support@blessingenterprise.com</a></p>
@@ -890,26 +1133,26 @@
             <h3 class="mb-4 text-xl font-serif text-pink-200">Info</h3>
             
             <div class="info-box">
-              <p class="text-sm font-semibold text-pink-200 mb-2">🕐 Business Hours</p>
+              <p class="text-sm font-semibold text-pink-200 mb-2">Business Hours</p>
               <ul class="text-sm text-slate-100 space-y-1">
                 <li><strong>Monday - Friday:</strong> 9:00 AM - 8:00 PM</li>
                 <li><strong>Saturday:</strong> 10:00 AM - 6:00 PM</li>
                 <li><strong>Sunday:</strong> 12:00 PM - 5:00 PM</li>
                 <li><strong>Public Holidays:</strong> 10:00 AM - 4:00 PM</li>
               </ul>
-              <p class="text-xs text-pink-200 mt-2">✨ 24/7 Online ordering via WhatsApp</p>
+              <p class="text-xs text-pink-200 mt-2">24/7 Online ordering via WhatsApp</p>
             </div>
             
             <div class="info-box">
-              <p class="text-sm font-semibold text-pink-200 mb-2">🚚 Delivery Information</p>
+              <p class="text-sm font-semibold text-pink-200 mb-2">Delivery Information</p>
               <ul class="text-sm text-slate-100 space-y-1">
-                <li>✅ <strong>Nakuru CBD</strong> - Free delivery (orders > KES 2000)</li>
-                <li>✅ <strong>Gilgil</strong> - Delivery fee: KES 150</li>
-                <li>✅ <strong>Langa Langa</strong> - Free Delivery</li>
-                <li>✅ <strong>Nairobi</strong> - Delivery fee: KES 500</li>
-                <li>✅ <strong>Nationwide</strong> - Delivery available</li>
+                <li><strong>Nakuru CBD</strong> - Free delivery (orders > KES 2000)</li>
+                <li><strong>Gilgil</strong> - Delivery fee: KES 150</li>
+                <li><strong>Langa Langa</strong> - Free Delivery</li>
+                <li><strong>Nairobi</strong> - Delivery fee: KES 500</li>
+                <li><strong>Nationwide</strong> - Delivery available</li>
               </ul>
-              <p class="text-xs text-pink-200 mt-2">⏱ Same-day delivery for orders before 2PM (Nakuru)</p>
+              <p class="text-xs text-pink-200 mt-2">Same-day delivery for orders before 2PM (Nakuru)</p>
             </div>
           </div>
     
@@ -918,34 +1161,34 @@
             <h3 class="mb-4 text-xl font-serif text-pink-200">Payments & Policies</h3>
             
             <div class="info-box">
-              <p class="text-sm font-semibold text-pink-200 mb-2">💳 Payment Methods</p>
+              <p class="text-sm font-semibold text-pink-200 mb-2">Payment Methods</p>
               <ul class="text-sm text-slate-100 space-y-1">
-                <li>💵 Cash on Delivery</li>
-                <li>📱 M-Pesa (Paybill: 123456)</li>
-                <li>💳 Visa/Mastercard via WhatsApp</li>
-                <li>🏦 Bank Transfer (Contact for details)</li>
+                <li>Cash on Delivery</li>
+                <li>M-Pesa (Paybill: 123456)</li>
+                <li>Visa/Mastercard via WhatsApp</li>
+                <li>Bank Transfer (Contact for details)</li>
               </ul>
             </div>
             
             <div class="info-box">
-              <p class="text-sm font-semibold text-pink-200 mb-2">🔄 Return & Exchange Policy</p>
+              <p class="text-sm font-semibold text-pink-200 mb-2">Return & Exchange Policy</p>
               <ul class="text-sm text-slate-100 space-y-1">
-                <li>✅ 7-day return for unopened products</li>
-                <li>✅ Exchange within 14 days with receipt</li>
-                <li>✅ Free exchange for damaged items</li>
-                <li>📞 Contact us within 24hrs of delivery</li>
+                <li>7-day return for unopened products</li>
+                <li>Exchange within 14 days with receipt</li>
+                <li>Free exchange for damaged items</li>
+                <li>Contact us within 24hrs of delivery</li>
               </ul>
             </div>
             
             <div class="info-box">
-              <p class="text-sm font-semibold text-pink-200 mb-2">🔗 Quick Links</p>
+              <p class="text-sm font-semibold text-pink-200 mb-2">Quick Links</p>
               <ul class="text-sm text-slate-100 space-y-1">
-                <li><a href="#" onclick="loadPage('pages/dashboard.html')" class="contact-link text-slate-100 hover:text-pink-200">🏠 Home</a></li>
-                <li><a href="#" onclick="loadPage('pages/products.html')" class="contact-link text-slate-100 hover:text-pink-200">🛍️ Shop</a></li>
-                <li><a href="#" onclick="loadPage('pages/about.html')" class="contact-link text-slate-100 hover:text-pink-200">📖 About Us</a></li>
-                <li><a href="#" onclick="loadPage('pages/contact.html')" class="contact-link text-slate-100 hover:text-pink-200">📞 Contact</a></li>
-                <li><a href="#" onclick="loadPage('pages/admin.html')" class="contact-link text-slate-100 hover:text-pink-200">🧾 Admin</a></li>
-                <li><a href="#" onclick="openCategory('Offers')" class="contact-link text-slate-100 hover:text-pink-200">🎉 Special Offers</a></li>
+                <li><a href="#" onclick="loadPage('pages/dashboard.html')" class="contact-link text-slate-100 hover:text-pink-200">Home</a></li>
+                <li><a href="#" onclick="loadPage('pages/products.html')" class="contact-link text-slate-100 hover:text-pink-200">Shop</a></li>
+                <li><a href="#" onclick="loadPage('pages/about.html')" class="contact-link text-slate-100 hover:text-pink-200">About Us</a></li>
+                <li><a href="#" onclick="loadPage('pages/contact.html')" class="contact-link text-slate-100 hover:text-pink-200">Contact</a></li>
+                <li><a href="admin.html" class="contact-link text-slate-100 hover:text-pink-200">Admin</a></li>
+                <li><a href="#" onclick="openCategory('Offers')" class="contact-link text-slate-100 hover:text-pink-200">Special Offers</a></li>
               </ul>
             </div>
           </div>
@@ -956,7 +1199,7 @@
         <div class="mb-8 rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur">
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h4 class="text-sm font-semibold text-pink-200 mb-2">📱 M-Pesa Paybill Instructions</h4>
+              <h4 class="text-sm font-semibold text-pink-200 mb-2">M-Pesa Paybill Instructions</h4>
               <ol class="text-xs text-slate-200 space-y-1 list-decimal list-inside">
                 <li>Go to M-Pesa menu → Lipa na M-Pesa → Paybill</li>
                 <li>Enter Business No: <strong class="text-pink-200">123456</strong></li>
@@ -987,10 +1230,10 @@
           
           <!-- Trust Badges -->
           <div class="mt-4 flex flex-wrap justify-center gap-6 text-xs text-slate-400">
-            <span>🔒 100% Secure Payments</span>
+            <span>100% Secure Payments</span>
             <span>⭐ 4.9/5 Customer Rating</span>
-            <span>🚚 Fast & Reliable Delivery</span>
-            <span>💯 Authentic Products</span>
+            <span>Fast & Reliable Delivery</span>
+            <span>Authentic Products</span>
           </div>
         </div>
       </div>
@@ -1014,7 +1257,7 @@
       <p id="cart-toast-text">Added to cart</p>
     </div>
 
-    <script src="products.js"></script>
-    <script src="scripts.js"></script>
+    <script src="products.js?v=20260429-4"></script>
+    <script src="scripts.js?v=20260429-4"></script>
   </body>
 </html>

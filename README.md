@@ -1,6 +1,6 @@
 # Blessing Enterprise Backend
 
-This project now includes a lightweight Python backend that serves the storefront and exposes a small JSON API.
+This project now includes a lightweight Python backend that serves the storefront, stores checkout/payment history in SQLite, and exposes a JSON API for the storefront plus admin dashboard.
 
 ## Start the app
 
@@ -45,15 +45,20 @@ Inside the Android emulator browser, open:
 - `POST /api/products` to add a new product from the admin dashboard
 - `POST /api/admin/login` to sign in to the admin dashboard
 - `POST /api/admin/logout` to sign out of the admin dashboard
-- `POST /api/orders` to save checkout orders
+- `POST /api/orders` and `POST /api/checkout` to save checkout orders and trigger M-Pesa STK Push
+- `POST /api/payments/mpesa/callback` to receive M-Pesa payment callbacks
+- `GET /api/orders/<reference>` to poll an order/payment status after checkout
 - `GET /api/newsletter` to view newsletter subscribers
 - `POST /api/newsletter/subscribe` to save newsletter signups
 - `POST /api/loyalty/join` to save loyalty members
 - `GET /api/dashboard` for quick totals and recent orders
+- `GET /api/admin/dashboard` and `GET /api/admin/orders` for admin order history
+- `POST /api/admin/orders/<reference>/delivery-status` to move orders between `new`, `on_delivery`, and `delivered`
+- `GET /api/admin/events` for live admin dashboard updates
 
 ## Admin dashboard
 
-After starting the backend, open the site and use the `Admin` link in the footer.
+After starting the backend, open `admin.html` directly or use the `Admin` link in the storefront footer. The admin dashboard is now a separate workspace from the customer UI.
 
 Default admin login:
 
@@ -72,12 +77,41 @@ From there you can:
 
 - add products to `data/products.json`
 - view newsletter subscribers from `data/newsletter.json`
+- watch recent orders and M-Pesa payment updates in real time
+- move orders through `Orders`, `On Delivery`, and `Delivered` queues
+- keep delivered orders out of the active queue while preserving their history
+
+## Payments and email
+
+The backend now uses SQLite at `data/blessing_enterprise.sqlite3` for order, payment, and email-delivery history.
+
+Until real credentials are added, checkout runs in mock M-Pesa mode by default so the flow can still be tested locally.
+
+By default, business email notifications target `vickyngvicky23@gmail.com`. You can override that with `BLESSING_ADMIN_EMAIL`.
+
+Useful environment variables:
+
+- `BLESSING_ADMIN_EMAIL`
+- `BLESSING_SMTP_HOST`
+- `BLESSING_SMTP_PORT`
+- `BLESSING_SMTP_USERNAME`
+- `BLESSING_SMTP_PASSWORD`
+- `BLESSING_SMTP_FROM_EMAIL`
+- `BLESSING_MPESA_CONSUMER_KEY`
+- `BLESSING_MPESA_CONSUMER_SECRET`
+- `BLESSING_MPESA_SHORTCODE`
+- `BLESSING_MPESA_PASSKEY`
+- `BLESSING_MPESA_CALLBACK_BASE_URL`
+- `BLESSING_MPESA_MOCK_MODE`
+- `BLESSING_MPESA_MOCK_RESULT`
 
 ## Stored data
 
-The backend writes JSON files inside `data/`:
+The backend still writes these JSON files inside `data/` for compatibility:
 
 - `products.json`
 - `orders.json`
 - `newsletter.json`
 - `loyalty.json`
+
+SQLite now stores the authoritative order, transaction, and email notification records.

@@ -1,12 +1,13 @@
 const STORAGE_KEYS={cart:"cart",favorites:"favorites",newsletterSubscribers:"newsletterSubscribers",loyaltyMembers:"loyaltyMembers",recentlyViewed:"recentlyViewed",newsletterShown:"newsletterShown"};
-const SESSION_KEYS={activeCategory:"activeCategory",productSearchQuery:"productSearchQuery",productSortOption:"productSortOption",adminToken:"adminToken",adminUsername:"adminUsername"};
+const SESSION_KEYS={activeCategory:"activeCategory",productSearchQuery:"productSearchQuery",productSortOption:"productSortOption",adminToken:"adminToken",adminUsername:"adminUsername",adminView:"adminView"};
 const APP_PAGES={home:"pages/dashboard.html",products:"pages/products.html",admin:"pages/admin.html"};
 const WHATSAPP_NUMBER="254711490385";
-const API_ORIGIN=window.location.protocol==="file:"?"http://127.0.0.1:8000":window.location.origin;
-const API_BASE=`${API_ORIGIN}/api`;
+const CHECKOUT_POLL_INTERVAL_MS=3000;
+const CHECKOUT_POLL_TIMEOUT_MS=90000;
 const PRODUCT_BATCH_SIZE=6;
 const QUICK_VIEW_FALLBACK_ID=2;
 const CATEGORY_ALIAS_MAP={Lipstick:"Lips",Foundation:"Facials",Mascara:"Lips",Skincare:"Facials",Eyeshadow:"Bodycare"};
+const ADMIN_VIEWS=["overview","orders","on-delivery","delivered","products","subscribers","database"];
 
 const state={
   cart:readStoredArray(STORAGE_KEYS.cart),
@@ -14,6 +15,9 @@ const state={
   activeCategory:readSessionValue(SESSION_KEYS.activeCategory,"All"),
   searchQuery:readSessionValue(SESSION_KEYS.productSearchQuery,""),
   sortOption:readSessionValue(SESSION_KEYS.productSortOption,"featured"),
+  adminView:readSessionValue(SESSION_KEYS.adminView,"orders"),
+  adminOrders:[],
+  adminDatabaseSnapshot:null,
   visibleProductCount:PRODUCT_BATCH_SIZE,
   pageCache:new Map(),
   pendingPageRequests:new Map(),
@@ -22,7 +26,12 @@ const state={
   toastTimerId:null,
   searchDebounceTimerId:null,
   countdownIntervalId:null,
-  stockAlertTimerId:null
+  stockAlertTimerId:null,
+  adminEventsSource:null,
+  checkoutPollTimerId:null,
+  resolvedApiBase:"",
+  apiDiscoveryPromise:null,
+  apiBaseVerified:false
 };
 
 let productsRendered=false;
@@ -34,6 +43,7 @@ function writeSessionValue(key,value){sessionStorage.setItem(key,value);}
 function removeSessionValue(key){sessionStorage.removeItem(key);}
 function getProductById(id){return products.find((product)=>product.id===Number(id))||null;}
 function formatCurrency(amount){return Number(amount).toFixed(2);}
+function formatMoney(amount,currency="KES"){return `${currency} ${formatCurrency(amount)}`;}
 function formatDateTime(value){const date=new Date(value);if(Number.isNaN(date.getTime()))return value||"Not available";return new Intl.DateTimeFormat("en-KE",{dateStyle:"medium",timeStyle:"short"}).format(date);}
 function getMainContent(){return document.getElementById("main-content");}
 function escapeHtml(value){return String(value).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#39;");}
@@ -42,6 +52,63 @@ function getAdminUsername(){return readSessionValue(SESSION_KEYS.adminUsername,"
 function isAdminAuthenticated(){return Boolean(getAdminToken());}
 function saveAdminSession(token,username){writeSessionValue(SESSION_KEYS.adminToken,token);writeSessionValue(SESSION_KEYS.adminUsername,username||"admin");}
 function clearAdminSession(){removeSessionValue(SESSION_KEYS.adminToken);removeSessionValue(SESSION_KEYS.adminUsername);}
+function isStandaloneAdminShell(){return document.body&&document.body.dataset&&document.body.dataset.app==="admin-dashboard";}
+function isAdminSurfaceActive(){return isStandaloneAdminShell()||state.currentPage.includes("admin.html");}
+function normalizeAdminView(view){return ADMIN_VIEWS.includes(String(view||"").trim())?String(view).trim():"orders";}
+function getOrderDeliveryStatus(order){const status=String(order?.deliveryStatus||"new").toLowerCase();return["new","on_delivery","delivered"].includes(status)?status:"new";}
+function formatDeliveryStatusLabel(status){return String(status||"new").replaceAll("_"," ").replace(/\b\w/g,(character)=>character.toUpperCase());}
+function normalizeApiBase(base){return String(base||"").replace(/\/+$/,"");}
+function getApiBaseCandidates(){
+  const configuredBase=normalizeApiBase(window.BLESSING_API_BASE||readSessionValue("blessingApiBase",""));
+  const candidates=[];
+  const addCandidate=(base)=>{
+    const normalized=normalizeApiBase(base);
+    if(!normalized||candidates.includes(normalized))return;
+    candidates.push(normalized);
+  };
+  if(configuredBase)addCandidate(configuredBase);
+  if(window.location.protocol!=="file:")addCandidate(`${window.location.origin}/api`);
+  const protocol=window.location.protocol==="file:"?"http:":window.location.protocol;
+  const hostname=window.location.hostname||"127.0.0.1";
+  addCandidate(`${protocol}//${hostname}:8000/api`);
+  addCandidate(`${protocol}//127.0.0.1:8000/api`);
+  addCandidate(`${protocol}//localhost:8000/api`);
+  return candidates;
+}
+async function probeApiBase(base){
+  try{
+    const response=await fetch(`${base}/health`,{headers:{Accept:"application/json"}});
+    if(!response.ok)return false;
+    const payload=await response.json();
+    return payload&&payload.status==="ok";
+  }catch(error){
+    return false;
+  }
+}
+async function resolveApiBase(forceRefresh=false){
+  if(!forceRefresh&&state.resolvedApiBase&&state.apiBaseVerified)return state.resolvedApiBase;
+  if(!forceRefresh&&state.apiDiscoveryPromise)return state.apiDiscoveryPromise;
+  const discoveryPromise=(async()=>{
+    for(const candidate of getApiBaseCandidates()){
+      if(await probeApiBase(candidate)){
+        state.resolvedApiBase=candidate;
+        state.apiBaseVerified=true;
+        writeSessionValue("blessingApiBase",candidate);
+        return candidate;
+      }
+    }
+    state.resolvedApiBase="";
+    state.apiBaseVerified=false;
+    removeSessionValue("blessingApiBase");
+    throw new Error("Unable to reach the backend API. Start python backend/server.py and open the site from that server or keep it running on port 8000.");
+  })();
+  state.apiDiscoveryPromise=discoveryPromise;
+  try{
+    return await discoveryPromise;
+  }finally{
+    state.apiDiscoveryPromise=null;
+  }
+}
 function syncProductCatalog(items){
   if(!Array.isArray(items)||items.length===0)return false;
   const normalizedItems=items.map((item)=>withCategoryDetails(item));
@@ -51,11 +118,34 @@ function syncProductCatalog(items){
   return true;
 }
 async function apiRequest(path,options={}){
+  const apiBase=await resolveApiBase();
   const adminToken=getAdminToken();
   const headers={Accept:"application/json",...(options.body?{"Content-Type":"application/json"}:{}),...(adminToken?{Authorization:`Bearer ${adminToken}`}:{}) ,...(options.headers||{})};
-  const response=await fetch(`${API_BASE}${path}`,{...options,headers});
+  let response;
+  try{
+    response=await fetch(`${apiBase}${path}`,{...options,headers});
+  }catch(initialError){
+    const retryBase=await resolveApiBase(true);
+    response=await fetch(`${retryBase}${path}`,{...options,headers});
+  }
   const contentType=response.headers.get("content-type")||"";
   const payload=contentType.includes("application/json")?await response.json():await response.text();
+  if(!response.ok&&apiBase!==state.resolvedApiBase){
+    state.apiBaseVerified=false;
+  }
+  if(!response.ok&&response.status===404){
+    const retryBase=await resolveApiBase(true);
+    if(retryBase!==apiBase){
+      const retryResponse=await fetch(`${retryBase}${path}`,{...options,headers});
+      const retryContentType=retryResponse.headers.get("content-type")||"";
+      const retryPayload=retryContentType.includes("application/json")?await retryResponse.json():await retryResponse.text();
+      if(!retryResponse.ok){
+        const retryMessage=retryPayload&&typeof retryPayload==="object"&&retryPayload.error?retryPayload.error:`Request failed with status ${retryResponse.status}`;
+        throw new Error(retryMessage);
+      }
+      return retryPayload;
+    }
+  }
   if(!response.ok){
     const message=payload&&typeof payload==="object"&&payload.error?payload.error:`Request failed with status ${response.status}`;
     throw new Error(message);
@@ -82,8 +172,32 @@ function setAdminProductStatus(message,type="info"){
   status.className=styles[type]||styles.info;
   status.textContent=message;
 }
+function setAdminOrdersStatus(message,type="info"){
+  const status=document.getElementById("admin-orders-status");
+  if(!status)return;
+  if(!message){status.className="hidden";status.textContent="";return;}
+  const styles={
+    success:"admin-status-banner rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700",
+    error:"admin-status-banner rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700",
+    info:"admin-status-banner rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-700"
+  };
+  status.className=styles[type]||styles.info;
+  status.textContent=message;
+}
 function setAdminAuthStatus(message,type="info"){
   const status=document.getElementById("admin-auth-status");
+  if(!status)return;
+  if(!message){status.className="hidden";status.textContent="";return;}
+  const styles={
+    success:"mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700",
+    error:"mt-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700",
+    info:"mt-5 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm text-violet-700"
+  };
+  status.className=styles[type]||styles.info;
+  status.textContent=message;
+}
+function setAdminDbStatus(message,type="info"){
+  const status=document.getElementById("admin-db-status");
   if(!status)return;
   if(!message){status.className="hidden";status.textContent="";return;}
   const styles={
@@ -104,22 +218,65 @@ function toggleAdminPanels(isAuthenticated){
 }
 function handleAdminAuthFailure(message="Please sign in to continue."){
   clearAdminSession();
+  closeAdminEventsStream();
   toggleAdminPanels(false);
+  state.adminOrders=[];
+  state.adminDatabaseSnapshot=null;
   setAdminProductStatus("","info");
+  setAdminOrdersStatus("","info");
+  setAdminDbStatus("","info");
   setAdminAuthStatus(message,"error");
 }
-function renderAdminSummary(productsPayload,newsletterPayload){
+function buildAdminOrderStats(items){
+  const orders=Array.isArray(items)?items:[];
+  const newOrders=orders.filter((order)=>getOrderDeliveryStatus(order)==="new").length;
+  const onDeliveryOrders=orders.filter((order)=>getOrderDeliveryStatus(order)==="on_delivery").length;
+  const deliveredOrders=orders.filter((order)=>getOrderDeliveryStatus(order)==="delivered").length;
+  const paidOrders=orders.filter((order)=>String(order?.paymentStatus||order?.payment?.status||"pending").toLowerCase()==="paid").length;
+  const pendingPayments=orders.filter((order)=>String(order?.paymentStatus||order?.payment?.status||"pending").toLowerCase()==="pending").length;
+  return{
+    orders:orders.length,
+    newOrders,
+    onDeliveryOrders,
+    deliveredOrders,
+    paidOrders,
+    pendingPayments
+  };
+}
+function renderAdminSummary(productsPayload,newsletterPayload,dashboardPayload,ordersItems=[]){
   const productCount=document.getElementById("admin-products-count");
   const subscriberCount=document.getElementById("admin-subscribers-count");
+  const productCountSecondary=document.getElementById("admin-products-count-secondary");
   const categoryCount=document.getElementById("admin-categories-count");
   const latestProduct=document.getElementById("admin-latest-product");
+  const ordersCount=document.getElementById("admin-orders-count");
+  const newOrdersCount=document.getElementById("admin-new-orders-count");
+  const onDeliveryCount=document.getElementById("admin-on-delivery-count");
+  const deliveredCount=document.getElementById("admin-delivered-count");
+  const paidOrdersCount=document.getElementById("admin-paid-orders-count");
+  const pendingPaymentsCount=document.getElementById("admin-pending-payments-count");
+  const revenueTotal=document.getElementById("admin-revenue-total");
   const productItems=Array.isArray(productsPayload?.items)?productsPayload.items:[];
   const newsletterItems=Array.isArray(newsletterPayload?.items)?newsletterPayload.items:[];
   const categories=new Set(productItems.map((item)=>item.category).filter(Boolean));
+  const totals=dashboardPayload?.totals||{};
+  const derivedOrderStats=buildAdminOrderStats(ordersItems);
   if(productCount)productCount.textContent=String(productsPayload?.count??productItems.length);
+  if(productCountSecondary)productCountSecondary.textContent=String(productsPayload?.count??productItems.length);
   if(subscriberCount)subscriberCount.textContent=String(newsletterPayload?.count??newsletterItems.length);
   if(categoryCount)categoryCount.textContent=String(categories.size);
   if(latestProduct)latestProduct.textContent=productItems.length?productItems[productItems.length-1].name:"No products yet";
+  if(ordersCount)ordersCount.textContent=String(derivedOrderStats.orders||totals.orders||0);
+  if(newOrdersCount)newOrdersCount.textContent=String(derivedOrderStats.newOrders||totals.newOrders||0);
+  if(onDeliveryCount)onDeliveryCount.textContent=String(derivedOrderStats.onDeliveryOrders||totals.onDeliveryOrders||0);
+  if(deliveredCount)deliveredCount.textContent=String(derivedOrderStats.deliveredOrders||totals.deliveredOrders||0);
+  if(paidOrdersCount)paidOrdersCount.textContent=String(derivedOrderStats.paidOrders||totals.paidOrders||0);
+  if(pendingPaymentsCount)pendingPaymentsCount.textContent=String(derivedOrderStats.pendingPayments||totals.pendingPayments||0);
+  if(revenueTotal)revenueTotal.textContent=formatMoney(totals.revenue??0,"KES");
+  [["orders",derivedOrderStats.newOrders],["on-delivery",derivedOrderStats.onDeliveryOrders],["delivered",derivedOrderStats.deliveredOrders],["products",productsPayload?.count??productItems.length],["subscribers",newsletterPayload?.count??newsletterItems.length]].forEach(([view,count])=>{
+    const badge=document.querySelector(`[data-admin-view-count="${view}"]`);
+    if(badge)badge.textContent=String(count);
+  });
 }
 function renderAdminProducts(items){
   const container=document.getElementById("admin-product-list");
@@ -142,6 +299,132 @@ function renderAdminSubscribers(items){
   }
   container.innerHTML=items.map((subscriber)=>`<article class="rounded-[1.35rem] border border-white/70 bg-white/90 px-4 py-4 shadow-soft"><p class="text-sm font-semibold text-[var(--brand-ink)] break-all">${escapeHtml(subscriber.email||"Unknown email")}</p><p class="mt-2 text-xs uppercase tracking-[0.18em] text-violet-700">Joined ${escapeHtml(formatDateTime(subscriber.createdAt))}</p></article>`).join("");
 }
+function renderAdminDatabase(snapshot){
+  const pathNode=document.getElementById("admin-db-path");
+  const generatedAtNode=document.getElementById("admin-db-generated-at");
+  const tablesNode=document.getElementById("admin-db-tables");
+  if(pathNode)pathNode.textContent=snapshot?.databasePath||"Not available";
+  if(generatedAtNode)generatedAtNode.textContent=snapshot?.generatedAt?`Snapshot generated ${formatDateTime(snapshot.generatedAt)}`:"Waiting for data...";
+  if(!tablesNode)return;
+  const tables=Array.isArray(snapshot?.tables)?snapshot.tables:[];
+  if(tables.length===0){
+    tablesNode.innerHTML='<div class="rounded-[1.5rem] border border-dashed border-violet-200 bg-white/80 px-5 py-8 text-center text-sm text-gray-500">No database tables were returned.</div>';
+    return;
+  }
+  tablesNode.innerHTML=tables.map((table)=>{
+    const previewRows=Array.isArray(table.preview)?table.preview:[];
+    const previewJson=previewRows.length?JSON.stringify(previewRows,null,2):"[]";
+    return`<article class="admin-order-card rounded-[1.6rem] p-5 shadow-soft transition"><div class="flex flex-wrap items-center justify-between gap-3"><div><p class="text-xs uppercase tracking-[0.22em] text-violet-700">Table</p><h3 class="mt-2 text-xl font-semibold text-[var(--brand-ink)]">${escapeHtml(table.name||"unknown")}</h3></div><span class="admin-chip rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-700">${escapeHtml(table.rowCount||0)} rows</span></div><p class="mt-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Recent rows</p><pre class="mt-3 overflow-x-auto rounded-[1.25rem] bg-slate-950 px-4 py-4 text-xs leading-6 text-slate-100">${escapeHtml(previewJson)}</pre></article>`;
+  }).join("");
+}
+function getPaymentTone(order){
+  const paymentStatus=String(order?.paymentStatus||order?.payment?.status||"pending").toLowerCase();
+  if(paymentStatus==="paid")return"bg-emerald-100 text-emerald-700";
+  if(paymentStatus==="failed"||paymentStatus==="cancelled")return"bg-rose-100 text-rose-700";
+  return"bg-amber-100 text-amber-700";
+}
+function getDeliveryTone(order){
+  const status=getOrderDeliveryStatus(order);
+  if(status==="delivered")return"bg-slate-200 text-slate-700";
+  if(status==="on_delivery")return"bg-sky-100 text-sky-700";
+  return"bg-violet-100 text-violet-700";
+}
+function setAdminView(view){
+  state.adminView=normalizeAdminView(view);
+  writeSessionValue(SESSION_KEYS.adminView,state.adminView);
+  document.querySelectorAll("[data-admin-view]").forEach((button)=>{
+    const isActive=button.dataset.adminView===state.adminView;
+    button.className=isActive
+      ?"admin-nav-button inline-flex items-center justify-between gap-3 rounded-2xl bg-[var(--admin-ink)] px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/10 transition"
+      :"admin-nav-button inline-flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-pink-200 hover:text-slate-900";
+  });
+  document.querySelectorAll("[data-admin-panel]").forEach((panel)=>{
+    panel.classList.toggle("hidden",panel.dataset.adminPanel!==state.adminView);
+  });
+}
+function buildAdminOrderActions(order){
+  const deliveryStatus=getOrderDeliveryStatus(order);
+  const reference=escapeHtml(order.reference||"");
+  const whatsappUrl=String(order.whatsappUrl||"").trim();
+  const actions=[];
+  if(deliveryStatus==="new"){
+    actions.push(`<button type="button" onclick="updateAdminOrderDeliveryStatus('${reference}','on_delivery')" class="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-slate-700">Mark On Delivery</button>`);
+    actions.push(`<button type="button" onclick="updateAdminOrderDeliveryStatus('${reference}','delivered')" class="rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 transition hover:bg-emerald-100">Mark Delivered</button>`);
+  }else if(deliveryStatus==="on_delivery"){
+    actions.push(`<button type="button" onclick="updateAdminOrderDeliveryStatus('${reference}','delivered')" class="rounded-full bg-emerald-600 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-emerald-500">Complete Delivery</button>`);
+    actions.push(`<button type="button" onclick="updateAdminOrderDeliveryStatus('${reference}','new')" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-700 transition hover:bg-slate-50">Move Back</button>`);
+  }else{
+    actions.push(`<button type="button" onclick="updateAdminOrderDeliveryStatus('${reference}','on_delivery')" class="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 transition hover:bg-sky-100">Reopen Delivery</button>`);
+  }
+  if(whatsappUrl){
+    actions.push(`<a href="${escapeHtml(whatsappUrl)}" target="_blank" rel="noreferrer" class="rounded-full border border-green-200 bg-green-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-green-700 transition hover:bg-green-100">WhatsApp</a>`);
+  }
+  return actions.join("");
+}
+function buildAdminOrderCard(order){
+  const payment=order.payment||{};
+  const customer=order.customer||{};
+  const items=Array.isArray(order.items)?order.items:[];
+  const currency=order.currency||"KES";
+  const itemCount=items.reduce((sum,item)=>sum+Math.max(0,Number(item?.quantity||0)),0);
+  const notes=String(order.notes||"").trim();
+  const customerEmail=String(customer.email||"").trim();
+  const itemsMarkup=items.length
+    ?items.map((item,index)=>{
+      const quantity=Math.max(0,Number(item?.quantity||0));
+      const unitPrice=Number(item?.unitPrice||0);
+      const lineTotal=Number(item?.lineTotal??(unitPrice*quantity));
+      const category=String(item?.category||"").trim();
+      return`<article class="admin-order-item rounded-2xl p-4"><div><p class="font-semibold text-[var(--brand-ink)]">${escapeHtml(item?.name||`Item ${index+1}`)}</p><p class="mt-1 text-xs uppercase tracking-[0.18em] text-slate-500">${escapeHtml(category||`Line ${index+1}`)}</p></div><div class="grid gap-1 text-sm text-gray-600 sm:text-right"><p><span class="font-semibold text-[var(--brand-ink)]">Qty:</span> ${escapeHtml(quantity||0)}</p><p><span class="font-semibold text-[var(--brand-ink)]">Unit:</span> ${escapeHtml(formatMoney(unitPrice,currency))}</p><p class="font-semibold text-violet-700">${escapeHtml(formatMoney(lineTotal,currency))}</p></div></article>`;
+    }).join("")
+    :'<div class="admin-subcard rounded-2xl border-dashed bg-slate-50 p-4 text-sm text-gray-500">No items were attached to this order.</div>';
+  return`<article class="admin-order-card rounded-[1.6rem] p-5 shadow-soft transition"><div class="flex flex-wrap items-start justify-between gap-3"><div><p class="text-xs uppercase tracking-[0.22em] text-violet-700">${escapeHtml(order.reference||"Order")}</p><h3 class="mt-2 text-lg font-semibold text-[var(--brand-ink)]">${escapeHtml(customer.name||"Unknown customer")}</h3><p class="mt-2 text-sm text-gray-500">${escapeHtml(customer.phone||"No phone")}${customerEmail?` <span class="text-slate-300">|</span> <span class="break-all">${escapeHtml(customerEmail)}</span>`:""}</p></div><div class="flex flex-wrap gap-2"><span class="admin-chip rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${getPaymentTone(order)}">${escapeHtml(order.paymentStatus||payment.status||"pending")}</span><span class="admin-chip rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] ${getDeliveryTone(order)}">${escapeHtml(formatDeliveryStatusLabel(getOrderDeliveryStatus(order)))}</span></div></div><div class="admin-order-main mt-4"><div><p class="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Items Ordered</p><div class="admin-order-items mt-3">${itemsMarkup}</div></div><div class="grid gap-3"><div class="admin-subcard rounded-2xl bg-violet-50/70 p-4 text-sm text-gray-600"><p class="font-semibold text-[var(--brand-ink)]">Customer details</p><div class="mt-3 grid gap-3 leading-6"><div><p class="text-xs uppercase tracking-[0.18em] text-violet-700">Phone</p><p class="mt-1">${escapeHtml(customer.phone||"No phone")}</p></div><div><p class="text-xs uppercase tracking-[0.18em] text-violet-700">Email</p><p class="mt-1 break-all">${escapeHtml(customerEmail||"No email")}</p></div><div><p class="text-xs uppercase tracking-[0.18em] text-violet-700">Delivery address</p><p class="mt-1">${escapeHtml(customer.address||"No delivery address")}</p></div></div></div><div class="admin-subcard rounded-2xl bg-rose-50/70 p-4 text-sm text-gray-600"><p class="font-semibold text-[var(--brand-ink)]">Order details</p><div class="mt-3 grid gap-3 leading-6"><div><p class="text-xs uppercase tracking-[0.18em] text-rose-500">Payment mode</p><p class="mt-1">${escapeHtml(payment.providerMode||"mock")}</p></div><div><p class="text-xs uppercase tracking-[0.18em] text-rose-500">Receipt</p><p class="mt-1">${escapeHtml(payment.mpesaReceiptNumber||"Pending")}</p></div><div><p class="text-xs uppercase tracking-[0.18em] text-rose-500">Last updated</p><p class="mt-1">${escapeHtml(formatDateTime(order.updatedAt||order.createdAt))}</p></div></div></div></div></div><div class="admin-order-footer">${notes?`<p class="text-sm text-gray-500"><span class="font-semibold text-[var(--brand-ink)]">Notes:</span> ${escapeHtml(notes)}</p>`:""}<div class="${notes?"mt-4 ":""}flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between"><div class="grid gap-3 sm:grid-cols-3"><div class="rounded-2xl bg-slate-50 px-4 py-3"><p class="text-xs uppercase tracking-[0.18em] text-slate-500">Total items</p><p class="mt-2 text-lg font-semibold text-[var(--brand-ink)]">${escapeHtml(itemCount||0)}</p></div><div class="rounded-2xl bg-slate-50 px-4 py-3"><p class="text-xs uppercase tracking-[0.18em] text-slate-500">Order total</p><p class="mt-2 text-lg font-semibold text-[var(--brand-ink)]">${escapeHtml(formatMoney(order.totalAmount||0,currency))}</p></div><div class="rounded-2xl bg-slate-50 px-4 py-3"><p class="text-xs uppercase tracking-[0.18em] text-slate-500">Placed</p><p class="mt-2 text-sm font-semibold text-[var(--brand-ink)]">${escapeHtml(formatDateTime(order.createdAt))}</p></div></div><div class="flex flex-wrap gap-2">${buildAdminOrderActions(order)}</div></div></div></article>`;
+}
+function renderAdminOrdersInto(containerId,items,emptyMessage){
+  const container=document.getElementById(containerId);
+  if(!container)return;
+  if(!Array.isArray(items)||items.length===0){
+    container.innerHTML=`<div class="rounded-[1.5rem] border border-dashed border-violet-200 bg-white/80 px-5 py-8 text-center text-sm text-gray-500">${escapeHtml(emptyMessage)}</div>`;
+    return;
+  }
+  container.innerHTML=items.map((order)=>buildAdminOrderCard(order)).join("");
+}
+function refreshAdminOrderViews(){
+  const items=Array.isArray(state.adminOrders)?state.adminOrders:[];
+  renderAdminOrdersInto("admin-overview-orders-list",items.filter((order)=>getOrderDeliveryStatus(order)!=="delivered").slice(0,6),"No active orders yet. New customer checkouts will appear here.");
+  renderAdminOrdersInto("admin-orders-list",items.filter((order)=>getOrderDeliveryStatus(order)==="new"),"No orders are waiting in the main queue.");
+  renderAdminOrdersInto("admin-on-delivery-list",items.filter((order)=>getOrderDeliveryStatus(order)==="on_delivery"),"No orders are currently marked as on delivery.");
+  renderAdminOrdersInto("admin-delivered-list",items.filter((order)=>getOrderDeliveryStatus(order)==="delivered"),"No orders have been marked as delivered yet.");
+}
+function renderAdminOrders(items){
+  state.adminOrders=Array.isArray(items)?items:[];
+  refreshAdminOrderViews();
+}
+function closeAdminEventsStream(){
+  if(state.adminEventsSource){
+    state.adminEventsSource.close();
+    state.adminEventsSource=null;
+  }
+}
+async function openAdminEventsStream(){
+  if(!isAdminAuthenticated()||state.adminEventsSource)return;
+  const token=getAdminToken();
+  if(!token)return;
+  let apiBase="";
+  try{
+    apiBase=await resolveApiBase();
+  }catch(error){
+    console.error(error);
+    setAdminOrdersStatus(error.message||"Unable to connect to the backend event stream.","error");
+    return;
+  }
+  const url=`${apiBase}/admin/events?token=${encodeURIComponent(token)}`;
+  const stream=new EventSource(url);
+  state.adminEventsSource=stream;
+  stream.addEventListener("order.updated",()=>{setAdminOrdersStatus("Order queue updated. Refreshing dashboard...","info");loadAdminDashboard({silent:true});});
+  stream.addEventListener("payment.updated",()=>{setAdminOrdersStatus("Payment update received. Refreshing dashboard...","success");loadAdminDashboard({silent:true});});
+  stream.onerror=()=>{closeAdminEventsStream();window.setTimeout(()=>{if(isAdminAuthenticated()&&isAdminSurfaceActive())openAdminEventsStream();},2500);};
+}
 function buildAdminProductPayload(form){
   const formData=new FormData(form);
   const offerEnabled=formData.get("offerEnabled")==="on";
@@ -160,39 +443,92 @@ function buildAdminProductPayload(form){
     }:null
   };
 }
-async function loadAdminDashboard(){
-  if(!isAdminAuthenticated()){
-    toggleAdminPanels(false);
-    setAdminAuthStatus("Sign in with your admin credentials to manage products and see subscribers.","info");
-    return;
-  }
-  const productList=document.getElementById("admin-product-list");
-  const subscriberList=document.getElementById("admin-subscriber-list");
-  if(productList)productList.innerHTML='<div class="rounded-[1.5rem] bg-white px-5 py-8 text-center text-sm text-gray-500 shadow-soft">Loading products...</div>';
-  if(subscriberList)subscriberList.innerHTML='<div class="rounded-[1.5rem] bg-white px-5 py-8 text-center text-sm text-gray-500 shadow-soft">Loading subscribers...</div>';
+async function updateAdminOrderDeliveryStatus(reference,deliveryStatus){
+  setAdminOrdersStatus(`Updating ${reference}...`,"info");
   try{
-    const [productsPayload,newsletterPayload]=await Promise.all([apiRequest("/products"),apiRequest("/newsletter")]);
-    syncProductCatalog(productsPayload.items);
-    renderAdminSummary(productsPayload,newsletterPayload);
-    renderAdminProducts(productsPayload.items);
-    renderAdminSubscribers(newsletterPayload.items);
-    const categoryOptions=document.getElementById("admin-category-options");
-    if(categoryOptions){
-      categoryOptions.innerHTML=[...new Set((productsPayload.items||[]).map((item)=>item.category).filter(Boolean))].sort((left,right)=>left.localeCompare(right)).map((category)=>`<option value="${escapeHtml(category)}"></option>`).join("");
+    let response;
+    try{
+      response=await apiRequest(`/admin/orders/${encodeURIComponent(reference)}/delivery-status`,{method:"POST",body:JSON.stringify({deliveryStatus})});
+    }catch(primaryError){
+      if(!String(primaryError.message||"").toLowerCase().includes("endpoint not found"))throw primaryError;
+      response=await apiRequest("/admin/orders/status",{method:"POST",body:JSON.stringify({reference,deliveryStatus})});
     }
-    toggleAdminPanels(true);
-    setAdminAuthStatus("","info");
-    setAdminProductStatus("Connected to the backend. New products will be saved to data/products.json.","info");
+    showToast(`Order ${reference} moved to ${formatDeliveryStatusLabel(deliveryStatus)}.`);
+    setAdminOrdersStatus(response.message||`Order ${reference} updated.`,"success");
+    await loadAdminDashboard({silent:true});
   }catch(error){
     console.error(error);
     if(error.message&&error.message.toLowerCase().includes("admin")){
       handleAdminAuthFailure(error.message);
       return;
     }
-    renderAdminSummary({items:products,count:products.length},{items:[],count:0});
+    const message=error.message&&error.message.toLowerCase().includes("endpoint not found")
+      ?"Delivery update endpoint was not available. Restart the Python backend, then try again."
+      :(error.message||"Unable to update the delivery status right now.");
+    setAdminOrdersStatus(message,"error");
+  }
+}
+async function loadAdminDashboard({silent=false}={}){
+  if(!isAdminAuthenticated()){
+    closeAdminEventsStream();
+    toggleAdminPanels(false);
+    setAdminAuthStatus("Sign in with your admin credentials to manage products and see subscribers.","info");
+    return;
+  }
+  const productList=document.getElementById("admin-product-list");
+  const subscriberList=document.getElementById("admin-subscriber-list");
+  const ordersList=document.getElementById("admin-orders-list");
+  const onDeliveryList=document.getElementById("admin-on-delivery-list");
+  const deliveredList=document.getElementById("admin-delivered-list");
+  const overviewList=document.getElementById("admin-overview-orders-list");
+  const dbTables=document.getElementById("admin-db-tables");
+  if(productList)productList.innerHTML='<div class="rounded-[1.5rem] bg-white px-5 py-8 text-center text-sm text-gray-500 shadow-soft">Loading products...</div>';
+  if(subscriberList)subscriberList.innerHTML='<div class="rounded-[1.5rem] bg-white px-5 py-8 text-center text-sm text-gray-500 shadow-soft">Loading subscribers...</div>';
+  if(!silent){
+    [ordersList,onDeliveryList,deliveredList,overviewList].forEach((container)=>{
+      if(container)container.innerHTML='<div class="rounded-[1.5rem] bg-white px-5 py-8 text-center text-sm text-gray-500 shadow-soft">Loading orders...</div>';
+    });
+    if(dbTables)dbTables.innerHTML='<div class="rounded-[1.5rem] bg-white px-5 py-8 text-center text-sm text-gray-500 shadow-soft">Loading database snapshot...</div>';
+  }
+  try{
+    const [productsPayload,newsletterPayload,dashboardPayload,ordersPayload,dbSnapshot]=await Promise.all([apiRequest("/products"),apiRequest("/newsletter"),apiRequest("/admin/dashboard"),apiRequest("/admin/orders?limit=200"),apiRequest("/admin/debug-db?limit=8")]);
+    const adminOrders=ordersPayload.items||dashboardPayload.recentOrders||[];
+    syncProductCatalog(productsPayload.items);
+    renderAdminSummary(productsPayload,newsletterPayload,dashboardPayload,adminOrders);
+    renderAdminProducts(productsPayload.items);
+    renderAdminSubscribers(newsletterPayload.items);
+    renderAdminOrders(adminOrders);
+    state.adminDatabaseSnapshot=dbSnapshot;
+    renderAdminDatabase(dbSnapshot);
+    const categoryOptions=document.getElementById("admin-category-options");
+    if(categoryOptions){
+      categoryOptions.innerHTML=[...new Set((productsPayload.items||[]).map((item)=>item.category).filter(Boolean))].sort((left,right)=>left.localeCompare(right)).map((category)=>`<option value="${escapeHtml(category)}"></option>`).join("");
+    }
+    toggleAdminPanels(true);
+    setAdminView(state.adminView);
+    setAdminAuthStatus("","info");
+    setAdminDbStatus(`Showing up to ${dbSnapshot?.previewLimit||8} recent rows per table.`,"info");
+    if(!silent){
+      setAdminOrdersStatus("Live dashboard connected. Orders will move between queue sections as you update delivery progress.","info");
+      setAdminProductStatus("Connected to the backend. New products will be saved to data/products.json.","info");
+    }
+    openAdminEventsStream();
+  }catch(error){
+    console.error(error);
+    if(error.message&&error.message.toLowerCase().includes("admin")){
+      handleAdminAuthFailure(error.message);
+      return;
+    }
+    closeAdminEventsStream();
+    renderAdminSummary({items:products,count:products.length},{items:[],count:0},{totals:{}});
     renderAdminProducts(products);
     renderAdminSubscribers([]);
-    setAdminProductStatus("Admin tools need the backend running. Start it with: python backend/server.py","error");
+    renderAdminOrders([]);
+    renderAdminDatabase(null);
+    const guidance=error.message&&error.message.toLowerCase().includes("backend api")?error.message:"Admin tools need the backend running. Start it with: python backend/server.py";
+    setAdminOrdersStatus(guidance,"error");
+    setAdminProductStatus(guidance,"error");
+    setAdminDbStatus(guidance,"error");
   }
 }
 async function submitAdminLoginForm(event){
@@ -224,9 +560,14 @@ async function logoutAdmin(){
   }catch(error){
     console.warn("Unable to complete backend logout cleanly.",error);
   }finally{
+    closeAdminEventsStream();
     clearAdminSession();
+    state.adminOrders=[];
+    state.adminDatabaseSnapshot=null;
     toggleAdminPanels(false);
     setAdminProductStatus("","info");
+    setAdminOrdersStatus("","info");
+    setAdminDbStatus("","info");
     setAdminAuthStatus("You have been signed out.","info");
   }
 }
@@ -261,6 +602,7 @@ function initAdminPage(){
   const form=document.getElementById("admin-product-form");
   const refreshButton=document.getElementById("admin-refresh-button");
   const logoutButton=document.getElementById("admin-logout-button");
+  const navButtons=document.querySelectorAll("[data-admin-view]");
   if(loginForm&&loginForm.dataset.bound!=="true"){
     loginForm.dataset.bound="true";
     loginForm.addEventListener("submit",submitAdminLoginForm);
@@ -277,18 +619,30 @@ function initAdminPage(){
     logoutButton.dataset.bound="true";
     logoutButton.addEventListener("click",logoutAdmin);
   }
+  navButtons.forEach((button)=>{
+    if(button.dataset.bound==="true")return;
+    button.dataset.bound="true";
+    button.addEventListener("click",()=>setAdminView(button.dataset.adminView||"overview"));
+  });
+  if(isStandaloneAdminShell()){
+    setAdminView("orders");
+  }else{
+    setAdminView(state.adminView);
+  }
   toggleAdminPanels(isAdminAuthenticated());
   if(isAdminAuthenticated()){
     loadAdminDashboard();
     return;
   }
+  closeAdminEventsStream();
   setAdminAuthStatus("Sign in with your admin credentials to manage products and see subscribers.","info");
 }
 function getCartItemsPayload(){return state.cart.map(({id,quantity})=>({id,quantity}));}
-function buildCheckoutMessage({name,phone,address,reference=""}){
+function buildCheckoutMessage({name,phone,email="",address,reference=""}){
   const orderLines=state.cart.map((item,index)=>`${index+1}. ${item.name} (x${item.quantity}) - $${formatCurrency(item.price*item.quantity)}`);
   const header=reference?[`Order Ref: ${reference}`]:[];
-  return["Hello BLESSING ENTERPRISE,","",...header,`My name is: ${name}`,`Phone: ${phone}`,"","I would like to place an order:","",...orderLines,"",`Total: $${formatCurrency(getCartTotal())}`,"","Delivery Address:",address,"","Thank you!"].join("\n");
+  const emailLine=email?[`Email: ${email}`]:[];
+  return["Hello BLESSING ENTERPRISE,","",...header,`My name is: ${name}`,`Phone: ${phone}`,...emailLine,"","I would like to place an order:","",...orderLines,"",`Total: $${formatCurrency(getCartTotal())}`,"","Delivery Address:",address,"","Thank you!"].join("\n");
 }
 function saveNewsletterFallback(email){
   const subscribers=readStoredArray(STORAGE_KEYS.newsletterSubscribers);
@@ -345,13 +699,19 @@ function setCheckoutStatus(message,type){
   const status=document.getElementById("checkout-status");
   if(!status)return;
   if(!message){status.className="hidden";status.textContent="";return;}
-  status.className=type==="success"?"status-chip rounded-2xl bg-green-50 text-green-700":"status-chip rounded-2xl bg-rose-50 text-rose-700";
+  const styles={
+    success:"status-chip rounded-2xl bg-green-50 text-green-700",
+    error:"status-chip rounded-2xl bg-rose-50 text-rose-700",
+    info:"status-chip rounded-2xl bg-violet-50 text-violet-700"
+  };
+  status.className=styles[type]||styles.info;
   status.textContent=message;
 }
 
 function clearCheckoutFeedback(){
   setFieldError("customer-name","");
   setFieldError("customer-phone","");
+  setFieldError("customer-email","");
   setFieldError("customer-address","");
   setCheckoutStatus("","");
 }
@@ -592,44 +952,83 @@ function checkout(){
   openCheckoutModal();
 }
 
+async function pollOrderUntilComplete(reference){
+  const startedAt=Date.now();
+  let latestOrder=null;
+  while(Date.now()-startedAt<CHECKOUT_POLL_TIMEOUT_MS){
+    await new Promise((resolve)=>{state.checkoutPollTimerId=window.setTimeout(resolve,CHECKOUT_POLL_INTERVAL_MS);});
+    const payload=await apiRequest(`/orders/${encodeURIComponent(reference)}`);
+    latestOrder=payload.item||null;
+    const paymentStatus=String(latestOrder?.paymentStatus||latestOrder?.payment?.status||"pending").toLowerCase();
+    if(paymentStatus==="paid"||paymentStatus==="failed"||paymentStatus==="cancelled")return latestOrder;
+  }
+  return latestOrder;
+}
+
 async function submitCheckoutForm(event){
   event.preventDefault();
   if(state.cart.length===0){closeCheckoutModal();return;}
   const form=event.target;
   const name=form.name.value.trim();
   const phone=form.phone.value.trim();
+  const email=(form.email?.value||"").trim().toLowerCase();
   const address=form.address.value.trim();
   const normalizedPhone=phone.replace(/\s+/g,"");
   const phoneValid=/^[+]?\d{10,15}$/.test(normalizedPhone);
+  const emailValid=!email||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   clearCheckoutFeedback();
   let hasError=false;
   if(!name){setFieldError("customer-name","Please enter your full name.");hasError=true;}
   if(!phone){setFieldError("customer-phone","Please enter your phone number.");hasError=true;}else if(!phoneValid){setFieldError("customer-phone","Use a valid phone number with 10 to 15 digits.");hasError=true;}
+  if(email&&!emailValid){setFieldError("customer-email","Use a valid email address or leave this field blank.");hasError=true;}
   if(!address){setFieldError("customer-address","Please enter your delivery address.");hasError=true;}
   if(hasError){setCheckoutStatus("Please correct the highlighted fields before continuing.","error");return;}
-  const fallbackMessage=buildCheckoutMessage({name,phone:normalizedPhone,address});
-  let whatsappUrl=`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(fallbackMessage)}`;
+  const submitButton=form.querySelector('button[type="submit"]');
+  const originalLabel=submitButton?submitButton.textContent:"Pay with M-Pesa";
   try{
-    setCheckoutStatus("Saving your order...","success");
+    if(submitButton){submitButton.disabled=true;submitButton.textContent="Starting M-Pesa...";}
+    setCheckoutStatus("Saving your order and sending an M-Pesa prompt...","info");
     const payload=await apiRequest("/orders",{
       method:"POST",
       body:JSON.stringify({
-        customer:{name,phone:normalizedPhone,address},
+        customer:{name,phone:normalizedPhone,email,address},
         items:getCartItemsPayload(),
         source:"website"
       })
     });
-    const orderReference=payload.order&&payload.order.reference?payload.order.reference:"";
-    whatsappUrl=payload.whatsappUrl||`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildCheckoutMessage({name,phone:normalizedPhone,address,reference:orderReference}))}`;
-    setCheckoutStatus(orderReference?`Order ${orderReference} saved. Opening WhatsApp...`:"Order saved. Opening WhatsApp...","success");
+    const order=payload.order||{};
+    const payment=order.payment||{};
+    const orderReference=order.reference||"";
+    if(!orderReference){throw new Error("The backend did not return an order reference.");}
+    state.cart=[];
+    persistCart();
+    renderCart();
+    updateCartUI();
+    setCheckoutStatus(`Order ${orderReference} saved. Waiting for your M-Pesa confirmation...`,"info");
+    if(payment.status==="failed"||payment.status==="cancelled"){
+      setCheckoutStatus("Order saved, but the M-Pesa prompt could not be completed. Please try again or contact the business admin.","error");
+      return;
+    }
+    const completedOrder=await pollOrderUntilComplete(orderReference);
+    const finalPaymentStatus=String(completedOrder?.paymentStatus||completedOrder?.payment?.status||payment.status||"pending").toLowerCase();
+    if(finalPaymentStatus==="paid"){
+      setCheckoutStatus(`Payment confirmed for ${orderReference}. Your order is now in the admin dashboard.`,"success");
+      showToast("Payment confirmed. Thank you for your order.");
+      window.setTimeout(()=>{form.reset();closeCheckoutModal();closeCart();},1200);
+      return;
+    }
+    if(finalPaymentStatus==="failed"||finalPaymentStatus==="cancelled"){
+      setCheckoutStatus("The M-Pesa payment did not complete. Please try the checkout again.","error");
+      return;
+    }
+    setCheckoutStatus(`Order ${orderReference} is still waiting for M-Pesa confirmation. The order is saved and visible in the dashboard.`,"info");
   }catch(error){
     console.error(error);
-    setCheckoutStatus("Backend unavailable, opening WhatsApp checkout instead.","error");
+    setCheckoutStatus(error.message&&error.message.toLowerCase().includes("backend api")?error.message:"Backend unavailable. Start the Python backend and try checkout again.","error");
+  }finally{
+    if(state.checkoutPollTimerId){clearTimeout(state.checkoutPollTimerId);state.checkoutPollTimerId=null;}
+    if(submitButton){submitButton.disabled=false;submitButton.textContent=originalLabel;}
   }
-  window.open(whatsappUrl,"_blank");
-  state.cart=[];
-  persistCart();
-  window.setTimeout(()=>{form.reset();closeCheckoutModal();closeCart();},900);
 }
 
 function toggleFavorite(id){
@@ -852,7 +1251,7 @@ function handlePageReady(page){
   const stockAlert=document.getElementById("stock-alert");
   if(!isProductsPage)productsRendered=false;
   if(isProductsPage)renderProducts();
-  if(isAdminPage)initAdminPage();
+  if(isAdminPage){initAdminPage();}else{closeAdminEventsStream();}
   if(page===APP_PAGES.home){initHomepageFeatures();}else{stopHomepageTimers();if(stockAlert)stockAlert.classList.add("hidden");}
   updateCartUI();
   updateFavoritesUI();
@@ -935,6 +1334,22 @@ function bindStaticEvents(){
 }
 
 async function initApp(){
+  if(isStandaloneAdminShell()){
+    state.currentPage="admin.html";
+    const standaloneRoot=document.getElementById("admin-standalone-root");
+    if(standaloneRoot){
+      standaloneRoot.innerHTML='<div class="py-20 text-center"><div class="inline-block h-12 w-12 animate-spin rounded-full border-b-2 border-pink-400"></div><p class="mt-4 text-slate-500">Loading admin workspace...</p></div>';
+      try{
+        standaloneRoot.innerHTML=await fetchPageContent(APP_PAGES.admin);
+      }catch(error){
+        console.error(error);
+        standaloneRoot.innerHTML="<p class='py-10 text-center text-rose-500'>Unable to load the admin dashboard.</p>";
+        return;
+      }
+    }
+    initAdminPage();
+    return;
+  }
   bindStaticEvents();
   updateCartUI();
   updateFavoritesUI();
@@ -971,3 +1386,4 @@ window.signupLoyalty=signupLoyalty;
 window.clearRecentlyViewed=clearRecentlyViewed;
 window.updateCartUI=updateCartUI;
 window.closeMobileMenu=closeMobileMenu;
+window.updateAdminOrderDeliveryStatus=updateAdminOrderDeliveryStatus;
