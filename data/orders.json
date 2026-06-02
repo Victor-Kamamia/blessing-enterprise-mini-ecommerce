@@ -1,5 +1,158 @@
 [
   {
+    "id": "ORD-20260602-0001",
+    "reference": "ORD-20260602-0001",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "new",
+    "createdAt": "2026-06-02T13:05:03+00:00",
+    "updatedAt": "2026-06-02T13:05:11+00:00",
+    "deliveryUpdatedAt": "2026-06-02T13:05:03+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "lanet umoja\nkamoronyo primary school"
+    },
+    "items": [
+      {
+        "id": 11,
+        "name": "Niacinamide Balance Serum",
+        "category": "Facials",
+        "image": "imag/product-retinol-serum.jpg",
+        "quantity": 3,
+        "unitPrice": 24.0,
+        "lineTotal": 72.0
+      }
+    ],
+    "totalAmount": 72.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260602-0001\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Niacinamide Balance Serum (x3) - KES 72.00\n\nTotal: KES 72.00\n\nDelivery Address:\nlanet umoja\nkamoronyo primary school\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260602-0001%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Niacinamide%20Balance%20Serum%20%28x3%29%20-%20KES%2072.00%0A%0ATotal%3A%20KES%2072.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0Akamoronyo%20primary%20school%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 72.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-738d28fe",
+      "checkoutRequestId": "mock-checkout-c02deab65d7b",
+      "mpesaReceiptNumber": "MOCKB65D7B",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-06-02T13:05:11+00:00",
+      "createdAt": "2026-06-02T13:05:03+00:00",
+      "updatedAt": "2026-06-02T13:05:11+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260504-0001",
+    "reference": "ORD-20260504-0001",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "new",
+    "createdAt": "2026-05-04T12:57:50+00:00",
+    "updatedAt": "2026-05-04T12:57:58+00:00",
+    "deliveryUpdatedAt": "2026-05-04T12:57:50+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "lanet umoja\nkamoronyo primary school"
+    },
+    "items": [
+      {
+        "id": 2,
+        "name": "Luxury Matte Lipstick",
+        "category": "Lips",
+        "image": "imag/lipstick.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      },
+      {
+        "id": 3,
+        "name": "Silk Hair Oil",
+        "category": "Haircare",
+        "image": "imag/hair-oil.png",
+        "quantity": 1,
+        "unitPrice": 25.0,
+        "lineTotal": 25.0
+      }
+    ],
+    "totalAmount": 40.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260504-0001\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Luxury Matte Lipstick (x1) - KES 15.00\n2. Silk Hair Oil (x1) - KES 25.00\n\nTotal: KES 40.00\n\nDelivery Address:\nlanet umoja\nkamoronyo primary school\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260504-0001%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Luxury%20Matte%20Lipstick%20%28x1%29%20-%20KES%2015.00%0A2.%20Silk%20Hair%20Oil%20%28x1%29%20-%20KES%2025.00%0A%0ATotal%3A%20KES%2040.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0Akamoronyo%20primary%20school%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 40.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-d5fbc3bd",
+      "checkoutRequestId": "mock-checkout-a2365023a5ba",
+      "mpesaReceiptNumber": "MOCK23A5BA",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-05-04T12:57:58+00:00",
+      "createdAt": "2026-05-04T12:57:50+00:00",
+      "updatedAt": "2026-05-04T12:57:58+00:00"
+    }
+  },
+  {
+    "id": "ORD-20260430-0001",
+    "reference": "ORD-20260430-0001",
+    "status": "paid",
+    "paymentStatus": "paid",
+    "source": "website",
+    "deliveryStatus": "new",
+    "createdAt": "2026-04-30T10:32:55+00:00",
+    "updatedAt": "2026-04-30T10:33:03+00:00",
+    "deliveryUpdatedAt": "2026-04-30T10:32:55+00:00",
+    "currency": "KES",
+    "customer": {
+      "name": "victor kamamia",
+      "phone": "0111554776",
+      "email": "kamamiavictor@gmail.com",
+      "address": "lanet umoja\nkamoronyo primary school"
+    },
+    "items": [
+      {
+        "id": 5,
+        "name": "Vitamin C Glow Serum",
+        "category": "Facials",
+        "image": "imag/vitamin-c-serum.png",
+        "quantity": 1,
+        "unitPrice": 15.0,
+        "lineTotal": 15.0
+      }
+    ],
+    "totalAmount": 15.0,
+    "whatsappMessage": "Hello BLESSING ENTERPRISE,\n\nOrder Ref: ORD-20260430-0001\nMy name is: victor kamamia\nPhone: 0111554776\nEmail: kamamiavictor@gmail.com\n\nI would like to place an order:\n\n1. Vitamin C Glow Serum (x1) - KES 15.00\n\nTotal: KES 15.00\n\nDelivery Address:\nlanet umoja\nkamoronyo primary school\n\nThank you!",
+    "whatsappUrl": "https://wa.me/254711490385?text=Hello%20BLESSING%20ENTERPRISE%2C%0A%0AOrder%20Ref%3A%20ORD-20260430-0001%0AMy%20name%20is%3A%20victor%20kamamia%0APhone%3A%200111554776%0AEmail%3A%20kamamiavictor%40gmail.com%0A%0AI%20would%20like%20to%20place%20an%20order%3A%0A%0A1.%20Vitamin%20C%20Glow%20Serum%20%28x1%29%20-%20KES%2015.00%0A%0ATotal%3A%20KES%2015.00%0A%0ADelivery%20Address%3A%0Alanet%20umoja%0Akamoronyo%20primary%20school%0A%0AThank%20you%21",
+    "notes": "",
+    "payment": {
+      "provider": "mpesa",
+      "providerMode": "mock",
+      "status": "paid",
+      "amount": 15.0,
+      "phoneNumber": "254111554776",
+      "merchantRequestId": "mock-merchant-b1848ab8",
+      "checkoutRequestId": "mock-checkout-997998aa2e6c",
+      "mpesaReceiptNumber": "MOCKAA2E6C",
+      "resultCode": 0,
+      "resultDesc": "The service request is processed successfully.",
+      "paidAt": "2026-04-30T10:33:03+00:00",
+      "createdAt": "2026-04-30T10:32:55+00:00",
+      "updatedAt": "2026-04-30T10:33:03+00:00"
+    }
+  },
+  {
     "id": "ORD-20260429-0012",
     "reference": "ORD-20260429-0012",
     "status": "paid",

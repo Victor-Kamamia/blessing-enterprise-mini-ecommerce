@@ -230,7 +230,7 @@ class Database:
         exclude_delivery_statuses: list[str] | None = None,
     ) -> list[dict[str, Any]]:
         with self._connect() as connection:
-            query = "SELECT reference FROM orders"
+            query = "SELECT * FROM orders"
             parameters: list[Any] = []
             clauses: list[str] = []
             normalized_statuses = [status.strip().lower() for status in (delivery_statuses or []) if str(status).strip()]
@@ -249,8 +249,8 @@ class Database:
             if limit is not None:
                 query += " LIMIT ?"
                 parameters.append(limit)
-            references = [str(row["reference"]) for row in connection.execute(query, tuple(parameters)).fetchall()]
-            return [order for order in (self._load_order(connection, reference) for reference in references) if order]
+            order_rows = connection.execute(query, tuple(parameters)).fetchall()
+            return self._serialize_order_rows(connection, order_rows)
 
     def get_orders_count_for_prefix(self, prefix: str) -> int:
         with self._connect() as connection:
@@ -371,6 +371,54 @@ class Database:
             (reference,),
         ).fetchone()
 
+        return self._serialize_order_row(order_row, item_rows, payment_row)
+
+    def _serialize_order_rows(self, connection: sqlite3.Connection, order_rows: list[sqlite3.Row]) -> list[dict[str, Any]]:
+        if not order_rows:
+            return []
+        references = [str(row["reference"]) for row in order_rows]
+        placeholders = ", ".join("?" for _ in references)
+        item_rows = connection.execute(
+            f"""
+            SELECT product_id, name, category, image, quantity, unit_price, line_total, order_reference
+            FROM order_items
+            WHERE order_reference IN ({placeholders})
+            ORDER BY order_reference ASC, id ASC
+            """,
+            tuple(references),
+        ).fetchall()
+        payment_rows = connection.execute(
+            f"""
+            SELECT transactions.*
+            FROM transactions
+            INNER JOIN (
+                SELECT order_reference, MAX(id) AS latest_id
+                FROM transactions
+                WHERE order_reference IN ({placeholders})
+                GROUP BY order_reference
+            ) latest ON latest.latest_id = transactions.id
+            """,
+            tuple(references),
+        ).fetchall()
+        items_by_reference: dict[str, list[sqlite3.Row]] = {reference: [] for reference in references}
+        for row in item_rows:
+            items_by_reference.setdefault(str(row["order_reference"]), []).append(row)
+        payments_by_reference = {str(row["order_reference"]): row for row in payment_rows}
+        return [
+            self._serialize_order_row(
+                order_row,
+                items_by_reference.get(str(order_row["reference"]), []),
+                payments_by_reference.get(str(order_row["reference"])),
+            )
+            for order_row in order_rows
+        ]
+
+    def _serialize_order_row(
+        self,
+        order_row: sqlite3.Row,
+        item_rows: list[sqlite3.Row],
+        payment_row: sqlite3.Row | None,
+    ) -> dict[str, Any]:
         order = {
             "id": str(order_row["reference"]),
             "reference": str(order_row["reference"]),

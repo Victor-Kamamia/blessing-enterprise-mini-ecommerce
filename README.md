@@ -63,7 +63,8 @@ After starting the backend, open `admin.html` directly or use the `Admin` link i
 Default admin login:
 
 - Username: `admin`
-- Password: `BlessingAdmin2026!`
+- Password: `
+`
 
 You can override them before starting the backend with:
 

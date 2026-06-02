@@ -1,0 +1,931 @@
+﻿/* ===========================
+   Global & Root Variables
+   =========================== */
+:root {
+  --brand-pink: #ff6fb4;
+  --brand-pink-soft: #fff0f7;
+  --brand-purple: #8e44ad;
+  --brand-purple-deep: #6e2f95;
+  --brand-lilac: #f3ebff;
+  --brand-ink: #2d1f37;
+  --brand-muted: #6c5b77;
+  --brand-line: rgba(142, 68, 173, 0.12);
+  --font-heading: 'Gotham', 'Optima', 'Playfair Display', sans-serif;
+  --font-body: 'Gotham', 'Optima', 'Poppins', sans-serif;
+}
+
+/* ===========================
+  HTML & Body
+  =========================== */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  background-color: #1c1242;
+
+  background:
+    /* Purple overlay - semi-transparent, allows background image to show through */
+    linear-gradient(
+      135deg,
+      rgba(43, 4, 94, 0.7),
+      rgba(94, 3, 146, 0.6)
+    ),
+    /* Background image - face/eye image, visible through overlay */
+    url("imag/background2.png") center center / cover no-repeat,
+    /* Fallback solid color */
+    #2a1242;
+  background-attachment: scroll;
+  background-blend-mode: normal;
+  color: #060213;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+/* ===========================
+  Headings
+  =========================== */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+body > main,
+#main-content {
+  color: #fff7ff;
+}
+
+#main-content :is(h1, h2, h3, h4, h5, h6) {
+  color: #ffffff !important;
+  text-shadow: 0 2px 18px rgba(28, 10, 46, 0.32);
+}
+
+#main-content :is(p, li, span, small),
+#main-content :is(.text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800),
+#main-content :is(.text-slate-300, .text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700) {
+  color: #fff7ff !important;
+}
+
+#main-content :is(input, textarea, select, option),
+#main-content :is(input, textarea, select)::placeholder,
+#main-content .product-card :is(h1, h2, h3, h4, h5, h6, p, span, small),
+#main-content .toolbar-chip,
+#main-content .hero-badge,
+#main-content .bg-white :is(h1, h2, h3, h4, h5, h6, p, span, small),
+#main-content .bg-white\/82,
+#main-content .bg-white\/78 {
+  color: var(--brand-ink) !important;
+  text-shadow: none;
+}
+
+/* ===========================
+  Animations
+  =========================== */
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 1s ease forwards;
+}
+.animate-fade-in.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.beauty-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 111, 180, 0.22);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 24px rgba(45, 31, 55, 0.14);
+  vertical-align: middle;
+}
+
+.beauty-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.beauty-icon-sm {
+  width: 2rem;
+  height: 2rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+/* ===========================
+   Navigation Bar - Transparent to show background
+   =========================== */
+nav {
+  background: rgba(255, 255, 255, 0.65) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+nav a, nav button, nav span {
+  color: #222222 !important;
+}
+
+nav a:hover, nav button:hover {
+  color: var(--brand-purple) !important;
+}
+
+nav button {
+  background: linear-gradient(135deg, var(--brand-purple), var(--brand-pink)) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 14px 30px rgba(142, 68, 173, 0.18);
+}
+
+nav button span {
+  color: #ffffff !important;
+}
+
+nav ul a {
+  color: #58456a !important;
+  font-weight: 500;
+}
+nav ul a:hover { color: var(--brand-pink) !important; }
+
+/* Make "BLESSING ENTERPRISE" text pink, larger, and bold */
+nav > div > div:first-child > a:last-child {
+  color: #ff6fb4 !important;
+  font-size: clamp(1.25rem, 3vw, 1.75rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.nav-shell {
+  gap: 1rem;
+}
+
+.brand-wordmark {
+  font-family: var(--font-heading) !important;
+  font-size: clamp(1.25rem, 3vw, 1.75rem) !important;
+  font-weight: 700 !important;
+  line-height: 1.1;
+  letter-spacing: 0.05em;
+}
+
+.mobile-menu-button {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.28rem;
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  border-radius: 9999px;
+  padding: 0.75rem;
+}
+
+.mobile-menu-button span {
+  display: block;
+  width: 1.15rem;
+  height: 2px;
+  border-radius: 9999px;
+  background: #ffffff;
+}
+
+.mobile-nav-panel {
+  border-top: 1px solid var(--brand-line);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 38px rgba(91, 36, 128, 0.12);
+}
+
+.mobile-nav-link {
+  display: block;
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  font-weight: 500;
+  color: #58456a !important;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.mobile-nav-link:hover {
+  color: var(--brand-pink) !important;
+  background: rgba(255, 240, 247, 0.95);
+}
+
+/* ===========================
+   Panels & Main Content - Transparent to show background
+   =========================== */
+#main-content,
+.overlay-panel,
+.glass-panel,
+.main-surface,
+.interactive-card:not(.product-card) {
+  /* Semi-transparent white to allow purple background to show through */
+  background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,244,251,0.48)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.15);
+  color: var(--brand-ink) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Specific section card */
+#main-content section.section-shell > .glass-panel > .grid.items-center.gap-10 > div:last-child {
+  background: linear-gradient(135deg, rgba(255,241,248,0.55), rgba(244,234,255,0.48)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #222222 !important;
+  backdrop-filter: blur(8px);
+}
+
+#main-content section.section-shell > .glass-panel > .grid.items-center.gap-10 > div:last-child > a {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1.75rem;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+  color: #222222 !important;
+}
+
+#main-content section.section-shell > .glass-panel > .grid.items-center.gap-10 > div:last-child > a :is(h1,h2,h3,h4,h5,h6,p,span) {
+  color: #222222 !important;
+}
+
+/* ===========================
+   Product Cards - More transparent to show background
+   =========================== */
+.product-card {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 1.25rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.08) !important;
+  color: var(--brand-ink) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.product-card:hover {
+  background: rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 24px 46px rgba(0, 0, 0, 0.2), 0 12px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+#recently-viewed-products {
+  justify-items: center;
+}
+
+#recently-viewed-products .product-card {
+  width: min(100%, 11rem);
+  padding: 0.5rem !important;
+}
+
+/* ===========================
+  Buttons
+  =========================== */
+.btn-primary,
+#cart-modal .mt-4.w-full,
+#checkout-modal button[type="submit"] {
+  background: linear-gradient(135deg, var(--brand-purple), var(--brand-pink)) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 14px 30px rgba(142, 68, 173, 0.18);
+}
+.btn-primary:hover,
+#cart-modal .mt-4.w-full:hover,
+#checkout-modal button[type="submit"]:hover { filter: brightness(1.04); }
+
+.btn-secondary,
+#checkout-modal button[type="button"] {
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: var(--brand-purple) !important;
+  border: 1px solid rgba(142, 68, 173, 0.18) !important;
+  box-shadow: 0 10px 22px rgba(142, 68, 173, 0.08);
+}
+.btn-secondary:hover,
+#checkout-modal button[type="button"]:hover { background: rgba(243, 235, 255, 0.85) !important; }
+
+/* ===========================
+   Footer - Improved Contrast
+   =========================== */
+footer {
+  background: linear-gradient(180deg, rgba(28,16,47,0.96), rgba(22,10,36,0.94) 56%, rgba(18,8,30,0.92)) !important;
+  backdrop-filter: blur(8px);
+  color: #ffffff !important;
+}
+
+footer .bg-white,
+footer .bg-white\/10 {
+  background: rgba(255,255,255,0.1) !important;
+  box-shadow: 0 16px 30px rgba(0,0,0,0.32) !important;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+footer h3 { color: #ffe4f3 !important; }
+footer h3, footer p, footer strong, footer span, footer small { color: #ffffff !important; }
+footer a { color: #f0e6ff !important; }
+footer a:hover { color: #ffffff !important; }
+
+/* Footer info boxes */
+footer .info-box {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===========================
+   Products Hero & Toolbar - Transparent to show background
+   =========================== */
+.products-hero {
+  /* Semi-transparent purple to allow background image to show through */
+  background: linear-gradient(135deg, rgba(80,35,130,0.65), rgba(100,50,155,0.58), rgba(120,60,175,0.52)) !important;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.2);
+  backdrop-filter: blur(4px);
+}
+.products-hero h2, .products-hero .hero-copy { color: #ffffff !important; }
+.products-hero .hero-kicker { color: #f7d9ff !important; }
+.products-hero .hero-badge {
+  background: rgba(255,255,255,0.15) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: none !important;
+}
+
+.products-toolbar {
+  /* Semi-transparent white to allow purple background to show through */
+  background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,244,251,0.48)) !important;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12) !important;
+  backdrop-filter: blur(8px);
+}
+.products-toolbar #category-filters button { box-shadow: 0 8px 18px rgba(0,0,0,0.1); }
+
+/* Category Dropdown Styles */
+.category-dropdown-menu {
+  animation: dropdownFadeIn 0.2s ease-out;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.category-dropdown-menu::-webkit-scrollbar {
+  width: 6px;
+}
+.category-dropdown-menu::-webkit-scrollbar-track {
+  background: transparent;
+}
+.category-dropdown-menu::-webkit-scrollbar-thumb {
+  background: rgba(142, 68, 173, 0.2);
+  border-radius: 3px;
+}
+.category-dropdown-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(142, 68, 173, 0.4);
+}
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.category-dropdown-toggle:focus {
+  outline: 2px solid rgba(142, 68, 173, 0.5);
+  outline-offset: 2px;
+}
+
+.products-toolbar #product-search,
+.products-toolbar #product-sort,
+.products-toolbar #product-results-count,
+.products-toolbar .toolbar-chip,
+.products-toolbar #clear-search {
+  background: rgba(255,255,255,0.92) !important;
+  color: var(--brand-ink) !important;
+  border-color: rgba(142,68,173,0.15) !important;
+}
+.products-toolbar .toolbar-hint { color: var(--brand-purple) !important; }
+
+/* ===========================
+  Utility Shadow
+  =========================== */
+.shadow-soft {
+  box-shadow: 0 16px 36px rgba(142,68,173,0.12), 0 5px 14px rgba(255,111,180,0.08) !important;
+}
+
+.section-shell {
+  margin-left: auto;
+  margin-right: auto;
+  width: min(100%, 72rem);
+  padding-left: 1rem;
+  padding-right: 1rem;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 720px;
+}
+
+.section-shell:first-child {
+  content-visibility: visible;
+  contain-intrinsic-size: auto;
+}
+
+#recently-viewed.section-shell {
+  margin-bottom: 1.25rem;
+  border-radius: 1.25rem;
+  background: rgba(18, 11, 51, 0.72);
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 20px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.info-box {
+  margin-bottom: 1.25rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 1rem;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.field-error {
+  border-color: rgba(225, 29, 72, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.12);
+}
+
+.status-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  font-weight: 500;
+}
+
+/* ===========================
+   Standardized Component Backgrounds
+   =========================== */
+.benefit-card,
+.interactive-card,
+.category-card,
+.review-card {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border: 1px solid rgba(142, 68, 173, 0.08);
+}
+
+.benefit-card:hover,
+.interactive-card:hover,
+.category-card:hover,
+.review-card:hover {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Glass panel standardization */
+.glass-panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,244,251,0.72)) !important;
+  border: 1px solid rgba(142, 68, 173, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+/* Modal and overlay standardization */
+#newsletter-popup .bg-white {
+  background: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Admin surface cards */
+.admin-surface-card,
+.admin-pane {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(142, 68, 173, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+/* ===========================
+   Text & Background Helpers - WCAG Contrast Compliant
+   =========================== */
+#main-content .text-rose-500,
+#main-content .text-rose-600,
+#main-content .text-rose-700,
+#main-content .text-pink-500,
+#main-content .text-pink-600 { color: #ff6fb4 !important; }
+
+#main-content .text-violet-700,
+#main-content .text-violet-600 { color: #7c3aed !important; }
+
+/* Ensure gray text has sufficient contrast on light backgrounds */
+#main-content .bg-white .text-gray-500,
+#main-content .bg-white\/82 .text-gray-500,
+#main-content .bg-white\/78 .text-gray-500,
+#main-content .product-card .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+#main-content .bg-white .text-gray-600,
+#main-content .bg-white\/82 .text-gray-600,
+#main-content .bg-white\/78 .text-gray-600,
+#main-content .product-card .text-gray-600 {
+  color: #4b5563 !important;
+}
+
+#main-content .bg-white .text-gray-700,
+#main-content .bg-white\/82 .text-gray-700,
+#main-content .bg-white\/78 .text-gray-700,
+#main-content .product-card .text-gray-700 {
+  color: #374151 !important;
+}
+
+#main-content .bg-violet-100 { background: rgba(243, 235, 255, 0.88) !important; }
+
+#main-content .bg-rose-50,
+#main-content .bg-rose-100,
+#main-content .bg-pink-50 { background: rgba(255, 240, 247, 0.88) !important; }
+
+#main-content,
+#main-content :is(h1, h2, h3, h4, h5, h6) {
+  color: #ffffff !important;
+}
+
+#main-content :is(p, li, small),
+#main-content :is(.text-gray-400, .text-gray-500, .text-gray-600, .text-gray-700, .text-gray-800),
+#main-content :is(.text-slate-300, .text-slate-400, .text-slate-500, .text-slate-600, .text-slate-700) {
+  color: rgba(255, 247, 255, 0.9) !important;
+}
+
+#main-content :is(input, textarea, select, option),
+#main-content :is(input, textarea, select)::placeholder,
+#main-content .product-card :is(h1, h2, h3, h4, h5, h6, p, li, span, small),
+#main-content .toolbar-chip,
+#main-content .hero-badge,
+#main-content .bg-white\/82,
+#main-content .bg-white\/78 {
+  color: var(--brand-ink) !important;
+  text-shadow: none !important;
+}
+
+#recently-viewed .recently-viewed-title {
+  color: var(--brand-pink) !important;
+}
+
+#main-content :is(
+  .glass-panel,
+  .main-surface,
+  .interactive-card,
+  .product-card,
+  .review-card,
+  .category-card,
+  .benefit-card,
+  .admin-surface-card,
+  .admin-pane,
+  .toolbar-chip,
+  .hero-badge,
+  .bg-white,
+  .bg-white\/50,
+  .bg-white\/78,
+  .bg-white\/82,
+  .bg-rose-50,
+  .bg-rose-100,
+  .bg-pink-50,
+  .bg-violet-100
+),
+#newsletter-popup .bg-white,
+#cart-modal > div,
+#checkout-modal > div,
+#product-details-modal > div,
+#beauty-quiz-modal > div {
+  color: var(--brand-ink) !important;
+  text-shadow: none !important;
+}
+
+#main-content :is(
+  .glass-panel,
+  .main-surface,
+  .interactive-card,
+  .product-card,
+  .review-card,
+  .category-card,
+  .benefit-card,
+  .admin-surface-card,
+  .admin-pane,
+  .toolbar-chip,
+  .hero-badge,
+  .bg-white,
+  .bg-white\/50,
+  .bg-white\/78,
+  .bg-white\/82,
+  .bg-rose-50,
+  .bg-rose-100,
+  .bg-pink-50,
+  .bg-violet-100
+) :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+#newsletter-popup .bg-white :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+#cart-modal > div :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+#checkout-modal > div :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+#product-details-modal > div :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+#beauty-quiz-modal > div :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong) {
+  color: var(--brand-ink) !important;
+  text-shadow: none !important;
+}
+
+#main-content :is(
+  .hero-banner,
+  .products-hero,
+  .from-pink-500,
+  .from-purple-600,
+  .from-fuchsia-500,
+  .from-rose-500,
+  .bg-pink-500,
+  .bg-rose-600,
+  .bg-violet-600,
+  .bg-red-500,
+  .btn-primary
+),
+#main-content :is(
+  .hero-banner,
+  .products-hero,
+  .from-pink-500,
+  .from-purple-600,
+  .from-fuchsia-500,
+  .from-rose-500,
+  .bg-pink-500,
+  .bg-rose-600,
+  .bg-violet-600,
+  .bg-red-500,
+  .btn-primary
+) :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong) {
+  color: #ffffff !important;
+}
+
+#main-content :is(
+  .glass-panel,
+  .main-surface,
+  .interactive-card,
+  .product-card,
+  .review-card,
+  .category-card,
+  .benefit-card,
+  .admin-surface-card,
+  .admin-pane
+) :is(
+  .from-pink-500,
+  .from-purple-600,
+  .from-fuchsia-500,
+  .from-rose-500,
+  .bg-pink-500,
+  .bg-rose-600,
+  .bg-violet-600,
+  .bg-red-500,
+  .btn-primary
+),
+#main-content :is(
+  .glass-panel,
+  .main-surface,
+  .interactive-card,
+  .product-card,
+  .review-card,
+  .category-card,
+  .benefit-card,
+  .admin-surface-card,
+  .admin-pane
+) :is(
+  .from-pink-500,
+  .from-purple-600,
+  .from-fuchsia-500,
+  .from-rose-500,
+  .bg-pink-500,
+  .bg-rose-600,
+  .bg-violet-600,
+  .bg-red-500,
+  .btn-primary
+) :is(h1, h2, h3, h4, h5, h6, p, li, span, small, label, strong),
+#main-content .products-hero .hero-badge {
+  color: #ffffff !important;
+}
+
+/* ===========================
+  Modals
+  =========================== */
+#cart-modal > div,
+#product-details-modal > div,
+#checkout-modal > div {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(8px);
+}
+
+#cart-modal,
+#checkout-modal {
+  align-items: stretch !important;
+  justify-content: flex-end !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+#cart-modal > div,
+#checkout-modal > div {
+  height: 100vh;
+  max-height: 100vh !important;
+  width: min(100vw, 32rem) !important;
+  max-width: 32rem !important;
+  border-radius: 2rem 0 0 2rem !important;
+  box-shadow: -24px 0 60px rgba(36, 19, 57, 0.18) !important;
+}
+
+.drawer-close-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(142, 68, 173, 0.14);
+  color: var(--brand-purple);
+  font-size: 2rem;
+  line-height: 1;
+  box-shadow: 0 10px 24px rgba(142, 68, 173, 0.1);
+}
+
+.drawer-close-button:hover {
+  background: rgba(243, 235, 255, 0.95);
+}
+
+/* ===========================
+  Dashboard specific - Fix first card alignment
+  =========================== */
+#main-content .section-shell:first-child .glass-panel .grid {
+  align-items: flex-start !important;
+}
+
+#main-content .section-shell:first-child .glass-panel .grid > div:first-child {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* added */
+      /* Enhanced Footer Styles */
+footer {
+  background: linear-gradient(180deg, rgba(36,19,57,0.95), rgba(28,16,47,0.92) 56%, rgba(22,10,36,0.9)) !important;
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+footer a {
+  transition: all 0.3s ease;
+}
+
+footer .social-icons a {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+footer .social-icons a:hover {
+  transform: translateY(-3px);
+}
+
+footer .rounded-xl {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  nav .nav-shell {
+    align-items: center;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+  }
+
+  nav .brand-lockup {
+    min-width: 0;
+    gap: 0.75rem;
+  }
+
+  nav .brand-lockup img {
+    height: 2.8rem;
+    width: 2.8rem;
+  }
+
+  nav .brand-wordmark {
+    max-width: 11rem;
+    font-size: 0.98rem;
+    white-space: normal;
+  }
+
+  #main-content {
+    padding-top: 6.6rem;
+  }
+
+  .section-shell {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .products-hero {
+    padding: 1.25rem !important;
+  }
+
+  .products-toolbar {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+    border-radius: 1.25rem;
+  }
+
+  .products-toolbar #category-filters {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 0.3rem;
+    scrollbar-width: thin;
+  }
+
+  .products-toolbar #category-filters button {
+    white-space: nowrap;
+  }
+
+  .products-toolbar .toolbar-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .products-toolbar .toolbar-row > div {
+    width: 100%;
+  }
+
+  .products-toolbar .toolbar-row .relative {
+    max-width: 100% !important;
+  }
+
+  #product-grid {
+    gap: 1.25rem !important;
+  }
+
+  #product-grid .product-card {
+    padding: 0.9rem !important;
+  }
+
+  #product-grid .product-card img {
+    height: 13.5rem !important;
+  }
+
+  #product-details-body .sticky.bottom-0 {
+    position: static;
+  }
+
+  footer .grid {
+    gap: 2rem;
+  }
+  
+  footer .text-sm {
+    font-size: 0.8rem;
+  }
+}
+
+/* List styling */
+footer ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+footer ul li {
+  margin-bottom: 0.25rem;
+}
+
+/* Link hover effects */
+footer a:not(.social-icons a) {
+  text-decoration: none;
+  position: relative;
+}
+
+footer a:not(.social-icons a):hover {
+  color: #ffd2ea;
+}
+
+/* M-Pesa section styling */
+footer .mpesa-instructions {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+}
+/* Alternative: If you have colored icons, remove the filter */
+footer .flex.gap-3 img {
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+footer .flex.gap-3 img:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+}

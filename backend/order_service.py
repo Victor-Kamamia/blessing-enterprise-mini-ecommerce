@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
 from .common import (
@@ -188,7 +188,7 @@ class OrderService:
         callback_metadata = {
             "Amount": float(order.get("totalAmount", 0) or 0),
             "MpesaReceiptNumber": f"MOCK{checkout_request_id[-6:].upper()}",
-            "TransactionDate": datetime.utcnow().strftime("%Y%m%d%H%M%S"),
+            "TransactionDate": datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S"),
             "PhoneNumber": str((order.get("payment") or {}).get("phoneNumber", order["customer"]["phone"])),
         }
         if result_mode == "cancelled":

@@ -800,11 +800,74 @@ function renderCategoryFilters(){
   const container=document.getElementById("category-filters");
   if(!container)return;
   const categories=[...productCategories,"Offers","Favorites"];
-  container.innerHTML=categories.map((category)=>{
-    const activeClasses=category===state.activeCategory?"bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white shadow-soft":"border border-fuchsia-100 bg-white text-violet-700";
-    return`<button type="button" onclick="filterProducts('${category}')" class="rounded-full px-4 py-2 text-sm font-medium transition hover:-translate-y-0.5 ${activeClasses}">${escapeHtml(category)}</button>`;
+  const activeMain=state.activeCategory==="All"||!categories.includes(state.activeCategory)?"All":state.activeCategory;
+  const activeClasses=activeMain==="All"?"bg-gradient-to-r from-fuchsia-500 to-violet-600 text-white shadow-soft":"border border-fuchsia-100 bg-white text-violet-700";
+  const dropdownItems=categories.map((category)=>{
+    const isActive=category===state.activeCategory;
+    const itemClasses=isActive?"bg-fuchsia-50 text-fuchsia-700 font-semibold":"text-violet-700 hover:bg-fuchsia-50";
+    return`<a href="#" onclick="event.preventDefault();filterProducts('${category}');closeCategoryDropdown();" class="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm transition ${itemClasses}"><span class="h-2 w-2 rounded-full ${isActive?'bg-fuchsia-500':'bg-violet-300'}"></span>${escapeHtml(category)}</a>`;
   }).join("");
+  container.innerHTML=`
+    <div class="category-dropdown relative inline-block" id="category-dropdown-wrapper">
+      <button type="button" onclick="toggleCategoryDropdown()" class="category-dropdown-toggle rounded-full px-5 py-2.5 text-sm font-medium transition hover:-translate-y-0.5 ${activeClasses}">
+        <span id="category-dropdown-label">${escapeHtml(activeMain)}</span>
+        <svg class="ml-1.5 inline-block h-4 w-4 transition-transform" id="category-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+      </button>
+      <div id="category-dropdown-menu" class="category-dropdown-menu absolute left-0 z-40 mt-2 min-w-[200px] rounded-2xl border border-fuchsia-100 bg-white p-2 shadow-lg" style="display:none;">
+        ${dropdownItems}
+      </div>
+    </div>
+  `;
+  attachDropdownHover();
 }
+
+function attachDropdownHover(){
+  const wrapper=document.getElementById("category-dropdown-wrapper");
+  const menu=document.getElementById("category-dropdown-menu");
+  const arrow=document.getElementById("category-dropdown-arrow");
+  if(!wrapper||!menu)return;
+  let hoverTimeout;
+  wrapper.addEventListener("mouseenter",()=>{
+    clearTimeout(hoverTimeout);
+    hoverTimeout=setTimeout(()=>{
+      menu.style.display="block";
+      if(arrow)arrow.style.transform="rotate(180deg)";
+    },100);
+  });
+  wrapper.addEventListener("mouseleave",()=>{
+    clearTimeout(hoverTimeout);
+    hoverTimeout=setTimeout(()=>{
+      menu.style.display="none";
+      if(arrow)arrow.style.transform="rotate(0deg)";
+    },150);
+  });
+}
+
+function toggleCategoryDropdown(){
+  const menu=document.getElementById("category-dropdown-menu");
+  const arrow=document.getElementById("category-dropdown-arrow");
+  if(!menu)return;
+  const isVisible=menu.style.display==="block";
+  if(isVisible){menu.style.display="none";if(arrow)arrow.style.transform="rotate(0deg)";}
+  else{menu.style.display="block";if(arrow)arrow.style.transform="rotate(180deg)";}
+}
+
+function closeCategoryDropdown(){
+  const menu=document.getElementById("category-dropdown-menu");
+  const arrow=document.getElementById("category-dropdown-arrow");
+  if(menu){menu.style.display="none";}
+  if(arrow){arrow.style.transform="rotate(0deg)";}
+}
+
+document.addEventListener("click",function(e){
+  const dropdown=document.querySelector(".category-dropdown");
+  const menu=document.getElementById("category-dropdown-menu");
+  const arrow=document.getElementById("category-dropdown-arrow");
+  if(dropdown&&menu&&!dropdown.contains(e.target)){
+    menu.style.display="none";
+    if(arrow)arrow.style.transform="rotate(0deg)";
+  }
+});
 
 function getFavoriteButtonMarkup(id,variant="card"){
   const saved=isFavorite(id);
@@ -1230,6 +1293,15 @@ function extractPageContent(html){
   return doc.body&&doc.body.innerHTML.trim()?doc.body.innerHTML:html;
 }
 
+function optimizePageImages(root){
+  if(!root)return;
+  root.querySelectorAll("img").forEach((image,index)=>{
+    image.decoding="async";
+    if(index>2&&!image.hasAttribute("loading"))image.loading="lazy";
+    if(index>2&&!image.hasAttribute("fetchpriority"))image.setAttribute("fetchpriority","low");
+  });
+}
+
 function showPageLoadingState(){
   const mainContent=getMainContent();
   if(!mainContent)return;
@@ -1249,6 +1321,7 @@ function handlePageReady(page){
   const isProductsPage=page.includes("products.html");
   const isAdminPage=page.includes("admin.html");
   const stockAlert=document.getElementById("stock-alert");
+  optimizePageImages(getMainContent());
   if(!isProductsPage)productsRendered=false;
   if(isProductsPage)renderProducts();
   if(isAdminPage){initAdminPage();}else{closeAdminEventsStream();}
@@ -1355,7 +1428,7 @@ async function initApp(){
   updateFavoritesUI();
   displayRecentlyViewed();
   closeMobileMenu();
-  await syncProductsFromApi();
+  syncProductsFromApi();
   loadPage(APP_PAGES.home);
 }
 

@@ -18,7 +18,7 @@ if __package__ in {None, ""}:
     sys.path.append(str(Path(__file__).resolve().parent.parent))
 
     from backend.admin_routes import AdminDashboardApi
-    from backend.common import normalize_phone, normalize_string_list, normalize_text, parse_price_value, read_json, validate_email, validate_phone, write_json
+    from backend.common import normalize_phone, normalize_string_list, normalize_text, parse_price_value, read_json, validate_email, validate_phone, write_json, utc_now_iso
     from backend.config import Settings, load_settings
     from backend.database import Database
     from backend.email_service import EmailService
@@ -27,7 +27,7 @@ if __package__ in {None, ""}:
     from backend.order_service import OrderService
 else:
     from .admin_routes import AdminDashboardApi
-    from .common import normalize_phone, normalize_string_list, normalize_text, parse_price_value, read_json, validate_email, validate_phone, write_json
+    from .common import normalize_phone, normalize_string_list, normalize_text, parse_price_value, read_json, validate_email, validate_phone, write_json, utc_now_iso
     from .config import Settings, load_settings
     from .database import Database
     from .email_service import EmailService
@@ -185,7 +185,7 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
             self.send_json(
                 {
                     "status": "ok",
-                    "timestamp": datetime.utcnow().isoformat() + "Z",
+                    "timestamp": utc_now_iso(),
                     "database": str(self.settings.database_file),
                     "mpesaMockMode": self.settings.mpesa_mock_mode,
                 }
@@ -329,7 +329,7 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
             return
 
         token = secrets.token_urlsafe(32)
-        session = {"username": username, "createdAt": datetime.utcnow().isoformat() + "Z"}
+        session = {"username": username, "createdAt": utc_now_iso()}
         with SESSION_LOCK:
             ADMIN_SESSIONS[token] = session
         self.send_json({"message": "Signed in successfully.", "token": token, "session": session})
@@ -498,7 +498,7 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
             if any(entry.get("email") == email for entry in subscribers):
                 self.send_json({"message": "This email is already subscribed.", "alreadySubscribed": True})
                 return
-            entry = {"email": email, "createdAt": datetime.utcnow().isoformat() + "Z"}
+            entry = {"email": email, "createdAt": utc_now_iso()}
             subscribers.append(entry)
             write_json(self.settings.newsletter_file, subscribers)
 
@@ -527,7 +527,7 @@ class BlessingRequestHandler(SimpleHTTPRequestHandler):
             if any(entry.get("phone") == phone for entry in members):
                 self.send_json({"message": "You are already a loyalty member.", "alreadyMember": True})
                 return
-            entry = {"phone": phone, "createdAt": datetime.utcnow().isoformat() + "Z"}
+            entry = {"phone": phone, "createdAt": utc_now_iso()}
             members.append(entry)
             write_json(self.settings.loyalty_file, members)
 

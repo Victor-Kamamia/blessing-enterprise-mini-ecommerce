@@ -82,9 +82,12 @@ SCHEMA_STATEMENTS = [
     "CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC)",
     "CREATE INDEX IF NOT EXISTS idx_orders_payment_status ON orders(payment_status)",
     "CREATE INDEX IF NOT EXISTS idx_orders_delivery_status ON orders(delivery_status)",
+    "CREATE INDEX IF NOT EXISTS idx_orders_delivery_created ON orders(delivery_status, created_at DESC)",
     "CREATE INDEX IF NOT EXISTS idx_order_items_reference ON order_items(order_reference)",
     "CREATE INDEX IF NOT EXISTS idx_transactions_reference ON transactions(order_reference)",
     "CREATE INDEX IF NOT EXISTS idx_transactions_checkout_request ON transactions(checkout_request_id)",
+    "CREATE INDEX IF NOT EXISTS idx_transactions_merchant_request ON transactions(merchant_request_id)",
+    "CREATE INDEX IF NOT EXISTS idx_transactions_reference_latest ON transactions(order_reference, id DESC)",
     "CREATE INDEX IF NOT EXISTS idx_email_notifications_reference ON email_notifications(order_reference)",
 ]
 

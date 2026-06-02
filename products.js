@@ -287,9 +287,10 @@ const products = [
 const productCategories = ["All", ...new Set(products.map((product) => product.category))];
 
 function preloadImages() {
-  const criticalImages = products.slice(0, 8).map((product) => product.image);
+  const criticalImages = products.slice(0, 3).map((product) => product.image);
   criticalImages.forEach((src) => {
     const img = new Image();
+    img.decoding = "async";
     img.src = src;
   });
 }
